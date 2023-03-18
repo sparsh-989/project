@@ -1,0 +1,19 @@
+name: Extract CODEOWNERS file owner
+
+on:
+  push:
+    branches-ignore:
+      - main
+
+jobs:
+  extract-owner:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Extract owner from CODEOWNERS file
+        run: |
+          OWNER=$(grep -E "^\*?\s*@\S+\b" CODEOWNERS | sed "s/.*@\([[:alnum:]-]\+\).*/\1/" | head -n 1)
+          echo "::set-output name=username::${OWNER}"
+      - name: Store owner username
+        run: |
+          echo "${{ steps.extract-owner.outputs.username }}" >> $GITHUB_ENV
