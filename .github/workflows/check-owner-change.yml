@@ -17,7 +17,8 @@ jobs:
 
       - name: Check if CODEOWNERS owner changed
         run: |
-          CHANGED_FILES=$(git diff --name-only HEAD^ HEAD)
+          FIRST_COMMIT=$(git rev-list --max-parents=0 HEAD)
+          CHANGED_FILES=$(git diff --name-only $FIRST_COMMIT HEAD)
           if echo "$CHANGED_FILES" | grep -q CODEOWNERS; then
             NEW_OWNER=$(grep -E "^\*?\s*@\S+\b" CODEOWNERS | sed "s/.*@\([[:alnum:]-]\+\).*/\1/" | head -n 1)
             echo "The owner in CODEOWNERS file has been changed to $NEW_OWNER" >> output.txt
