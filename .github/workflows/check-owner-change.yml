@@ -1,27 +1,34 @@
-name: Extract Owner
+name: Check CODEOWNERS owner change
 
 on:
   push:
-    branches:
-      - "!main"
+    branches-ignore:
+      - main
+  pull_request:
+    branches-ignore:
+      - main
 
 jobs:
-  extract-owner:
+  check-owners-change:
     runs-on: ubuntu-latest
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      GITHUB_REPOSITORY: ${{ github.repository }}
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Extract owner
+      - name: Check if CODEOWNERS owner changed
         run: |
-          OWNER=$(grep -E "^\*?\s*@\S+\b" CODEOWNERS | sed "s/.*@\([[:alnum:]-]\+\).*/\1/" | head -n 1)
-          echo "OWNER=$OWNER" >> $GITHUB_ENV
+          FIRST_COMMIT=$(git rev-list --max-parents=0 HEAD)
+          CHANGED_FILES=$(git diff --name-only $FIRST_COMMIT HEAD)
+          if echo "$CHANGED_FILES" | grep -q CODEOWNERS; then
+            NEW_OWNER=$(grep -E "^\*?\s*@\S+\b" CODEOWNERS | sed "s/.*@\([[:alnum:]-]\+\).*/\1/" | head -n 1)
+            echo "The owner in CODEOWNERS file has been changed to $NEW_OWNER" >> output.txt
+          fi
 
-      - name: Add owner to file
-        uses: peter-evans/create-file@v2
-        with:
-          path: 'owner.txt'
-          content: ${{ env.OWNER }}
+      - name: Commit changes to output.txt
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          git checkout main
+          git add output.txt
+          git commit -m "Update output.txt file with owner change message"
+          git push
