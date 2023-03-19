@@ -1,19 +1,27 @@
-name: Extract CODEOWNERS file owner
+name: Extract Owner
 
 on:
   push:
-    branches-ignore:
-      - main
+    branches:
+      - "!main"
 
 jobs:
   extract-owner:
     runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_REPOSITORY: ${{ github.repository }}
     steps:
-      - uses: actions/checkout@v2
-      - name: Extract owner from CODEOWNERS file
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Extract owner
         run: |
           OWNER=$(grep -E "^\*?\s*@\S+\b" CODEOWNERS | sed "s/.*@\([[:alnum:]-]\+\).*/\1/" | head -n 1)
-          echo "::set-output name=username::${OWNER}"
-      - name: Store owner username
-        run: |
-          echo "${{ steps.extract-owner.outputs.username }}" >> $GITHUB_ENV
+          echo "OWNER=$OWNER" >> $GITHUB_ENV
+
+      - name: Add owner to file
+        uses: peter-evans/create-file@v2
+        with:
+          path: 'owner.txt'
+          content: ${{ env.OWNER }}
