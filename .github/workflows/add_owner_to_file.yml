@@ -1,41 +1,24 @@
-name: Add owner to file
+name: Add Owner to File
 
 on:
-  workflow_run:
-    workflows:
-      - "Extract CODEOWNERS file owner"
-    branches-ignore:
+  push:
+    branches:
       - main
-    types:
-      - completed
 
 jobs:
-  add-owner-to-file:
+  add-owner:
     runs-on: ubuntu-latest
-    needs: extract-owner
     steps:
-      - uses: actions/checkout@v2
-      - name: Create text file in main branch with owner username
-        uses: actions/github-script@v5
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Read owner from file
+        run: |
+          OWNER=$(cat owner.txt)
+          echo "OWNER=$OWNER" >> $GITHUB_ENV
+
+      - name: Add owner to file
+        uses: peter-evans/create-file@v2
         with:
-          script: |
-            const ownerUsername = "${{ steps.extract-owner.outputs.username }}";
-            const content = `New owner: @${ownerUsername}`;
-            const filePath = 'new_owner.txt';
-
-            const { data: branch } = await github.rest.repos.getBranch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              branch: 'main'
-            });
-
-            await github.rest.repos.createOrUpdateFileContents({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              path: filePath,
-              message: `Add new owner file for ${ownerUsername}`,
-              content: Buffer.from(content).toString('base64'),
-              branch: 'main',
-              sha: branch.commit.sha,
-              token: ${{ secrets.GITHUB_TOKEN }}
-            });
+          path: 'owner.txt'
+          content: ${{ env.OWNER }}
