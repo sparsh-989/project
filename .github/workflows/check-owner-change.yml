@@ -17,6 +17,6 @@ jobs:
       run: |
         old_owner=$(awk '$1 ~ /^.*$/ {print $1}' ${{ github.event.inputs.before }}CODEOWNERS)
         new_owner=$(awk '$1 ~ /^.*$/ {print $1}' ${{ github.event.inputs.after }}CODEOWNERS)
-        if [ "$new_owner" != "$old_owner" ]; then
+       
           echo "Hello $new_owner! You are now an owner of the file in the CODEOWNERS file."
         fi
