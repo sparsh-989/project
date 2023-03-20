@@ -1,25 +1,30 @@
-name: Update Example File
-
+name: Update example.txt on main branch
 on:
   push:
     branches:
       - ptest
 
 jobs:
-  update-example-file:
+  update-example:
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout main branch
       uses: actions/checkout@v2
       with:
         ref: main
-    - name: Update example.txt
-      run: echo "Hello" >> example.txt
-    - name: Commit and push changes
-      uses: EndBug/add-and-commit@v7
+
+    - name: Append message to example.txt
+      run: echo "Hello, World!" >> example.txt
+
+    - name: Commit changes
+      run: |
+        git config --global user.email "actions@github.com"
+        git config --global user.name "GitHub Actions"
+        git add example.txt
+        git commit -m "Update example.txt with hello message"
+    
+    - name: Push changes
+      uses: ad-m/github-push-action@v0.6.0
       with:
-        message: "Update example.txt"
-        add: "example.txt"
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        branch: main
+        github_token: ${{ secrets.GITHUB_TOKEN }}
