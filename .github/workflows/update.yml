@@ -27,7 +27,7 @@ jobs:
     - name: Commit and push changes
       run: |
         git config user.name "GitHub Actions Bot"
-        git config user.email "<your-email>"
+        git config user.email "<ishunitk989@gmail.com>"
         git add example.txt
         git commit -m "Update example.txt with a hello message"
         git push origin main
