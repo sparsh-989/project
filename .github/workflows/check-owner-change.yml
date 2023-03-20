@@ -15,6 +15,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Verify file exists
+        run: |
+          ls
+
       - name: Check if CODEOWNERS owner changed
         run: |
           FIRST_COMMIT=$(git rev-list --max-parents=0 HEAD)
@@ -32,4 +36,4 @@ jobs:
           git checkout main
           git add output.txt
           git commit -m "Update output.txt file with owner change message"
-          git push origin main
+          git push project main
