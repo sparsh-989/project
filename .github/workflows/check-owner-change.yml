@@ -32,4 +32,4 @@ jobs:
           git checkout main
           git add output.txt
           git commit -m "Update output.txt file with owner change message"
-          git push origin main
+          git push project main
