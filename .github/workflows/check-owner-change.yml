@@ -1,4 +1,4 @@
-name: CODEOWNERS Changes
+name: CODEOWNERS Update Notification
 
 on:
   push:
@@ -8,15 +8,9 @@ on:
       - '**/CODEOWNERS'
 
 jobs:
-  codeowners-changes:
+  codeowners-update-notification:
     runs-on: ubuntu-latest
+
     steps:
-    - name: Check out repository
-      uses: actions/checkout@v2
-    - name: Print hello message
-      run: |
-        old_owner=$(awk '$1 ~ /^.*$/ {print $1}' ${{ github.event.inputs.before }}CODEOWNERS)
-        new_owner=$(awk '$1 ~ /^.*$/ {print $1}' ${{ github.event.inputs.after }}CODEOWNERS)
-       
-          echo "Hello $new_owner! You are now an owner of the file in the CODEOWNERS file."
-        fi
+      - name: Say Hello
+        run: echo "Hello! A CODEOWNERS file has been updated in a non-main branch."
