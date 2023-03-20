@@ -27,7 +27,9 @@ jobs:
     - name: Commit and push changes
       run: |
         git config user.name "GitHub Actions Bot"
-        git config user.email "<ishunitk989@gmail.com>"
+        git config user.email "your_email@example.com"
         git add example.txt
         git commit -m "Update example.txt with a hello message"
+        git remote set-url origin "https://x-access-token:${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}@github.com/sparsh-989/project.git"
         git push origin main
+
