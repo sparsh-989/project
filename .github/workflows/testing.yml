@@ -1,9 +1,7 @@
-name: Update tsc.json with new member from CODEOWNERS
+name: Update tsc.json
 
 on:
   push:
-    branches-ignore:
-      - main
     paths:
       - 'CODEOWNERS'
 
@@ -15,37 +13,39 @@ jobs:
     - name: Checkout current branch
       uses: actions/checkout@v2
 
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y jq
+
     - name: Checkout main branch
       run: |
         git fetch origin main:main
         git checkout main
 
-    - name: Extract username and check if it exists in tsc.json
-      id: check_user
+    - name: Check if user exists and update tsc.json
+      env:
+        CODEOWNERS_FILE: ${{ github.workspace }}/CODEOWNERS
+        TSC_JSON_FILE: ${{ github.workspace }}/tsc.json
       run: |
-        USERNAME=$(grep "test.txt" CODEOWNERS | awk '{print $2}' | sed 's/@//')
-        REPO_NAME=$(basename `git rev-parse --show-toplevel`)
-        EXISTS=$(jq '.[] | select(.github == '\"$USERNAME\"')' tsc.json)
-        echo "::set-output name=username::$USERNAME"
-        echo "::set-output name=repo_name::$REPO_NAME"
-        echo "::set-output name=exists::$EXISTS"
-
-    - name: Add new member to tsc.json
-      if: steps.check_user.outputs.exists == ''
-      run: |
-        echo '{
-          "name": "New Member",
-          "github": "${{ steps.check_user.outputs.username }}",
-          "repos": [
-            "${{ steps.check_user.outputs.repo_name }}"
-          ]
-        }' >> tsc.json
-
-    - name: Commit and push changes
-      run: |
-        git config user.name "GitHub Actions Bot"
-        git config user.email "your_email@example.com"
-        git add tsc.json
-        git commit -m "Update tsc.json with a new member from CODEOWNERS"
-        git remote set-url origin "https://x-access-token:${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}@github.com/sparsh-989/project.git"
-        git push origin main
+        git diff HEAD^ HEAD -- $CODEOWNERS_FILE | grep "^+" | grep -v "^+++" | while read -r line; do
+          username=$(echo "$line" | awk '{print $NF}' | sed 's/@//g')
+          repo=$(echo "$line" | awk -F'/' '{print $1}')
+          if ! jq '.[] | select(.github == "'$username'")' $TSC_JSON_FILE > /dev/null; then
+            jq '. |= .+ [{
+              "name": "New Member",
+              "github": "'$username'",
+              "linkedin": "",
+              "slack": "",
+              "twitter": "",
+              "availableForHire": false,
+              "repos": ["'$repo'"]
+            }]' $TSC_JSON_FILE > tsc.json.tmp && mv tsc.json.tmp $TSC_JSON_FILE
+            git config user.name "GitHub Actions Bot"
+            git config user.email "your_email@example.com"
+            git add $TSC_JSON_FILE
+            git commit -m "Update tsc.json with a new member"
+            git remote set-url origin "https://x-access-token:${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}@github.com/your-username/your-repo.git"
+            git push origin main
+          fi
+        done
