@@ -567,14 +567,4 @@
 		]
 	}
 ]
-{
-  "name": "New Member",
-  "github": "newmember",
-  "linkedin": "newmember",
-  "slack": "U01XXXXX",
-  "twitter": "newmember",
-  "availableForHire": true,
-  "repos": [
-    "new-repo"
-  ]
-}
+
