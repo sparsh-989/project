@@ -8,7 +8,8 @@ const TSC_JSON_PATH = path.join(process.cwd(), 'tsc.json');
 const tscJson = require(TSC_JSON_PATH);
 
 const getLatestCommitDiff = () => {
-  return execSync('git diff HEAD^ HEAD -- CODEOWNERS', { encoding: 'utf8' });
+  let cmd = "git diff ..main -- CODEOWNERS";
+  return execSync(cmd, { encoding: 'utf8' });
 };
 
 const codeownersDiff = getLatestCommitDiff();
@@ -31,4 +32,5 @@ while ((match = regex.exec(codeownersDiff)) !== null) {
   }
 }
 
+execSync("git checkout main", { encoding: 'utf8' });
 fs.writeFileSync(TSC_JSON_PATH, JSON.stringify(tscJson, null, 2));
