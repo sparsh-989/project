@@ -2,18 +2,23 @@ name: Update example.txt
 
 on:
   push:
-    branches:
-      - ptest
+    branches-ignore:
+      - main
+    paths:
+      - '.github/CODEOWNERS'
 
 jobs:
   update_example_txt:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout ptest branch
+    - name: Checkout current branch
       uses: actions/checkout@v2
-      with:
-        ref: ptest
+
+    - name: Get branch name
+      id: get-branch-name
+      run: |
+        echo "::set-output name=branch_name::$(git branch --show-current)"
 
     - name: Checkout main branch
       run: |
@@ -32,4 +37,3 @@ jobs:
         git commit -m "Update example.txt with a hello message"
         git remote set-url origin "https://x-access-token:${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}@github.com/sparsh-989/project.git"
         git push origin main
-
