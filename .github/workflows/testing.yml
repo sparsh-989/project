@@ -1,4 +1,4 @@
-name: Update example.txt
+name: Update tsc.json
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
       - 'CODEOWNERS'
 
 jobs:
-  update_example_txt:
+  update_tsc_json:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,15 +20,25 @@ jobs:
         git fetch origin main:main
         git checkout main
 
-    - name: Write hello message to example.txt
+    - name: Add new member to tsc.json
       run: |
-        echo "Hello" >> example.txt
+        echo '{
+          "name": "New Member",
+          "github": "newmember",
+          "linkedin": "newmember",
+          "slack": "U01XXXXX",
+          "twitter": "newmember",
+          "availableForHire": true,
+          "repos": [
+            "new-repo"
+          ]
+        }' >> tsc.json
 
     - name: Commit and push changes
       run: |
         git config user.name "GitHub Actions Bot"
         git config user.email "your_email@example.com"
-        git add example.txt
-        git commit -m "Update example.txt with a hello message"
+        git add tsc.json
+        git commit -m "Update tsc.json with a new member"
         git remote set-url origin "https://x-access-token:${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}@github.com/sparsh-989/project.git"
         git push origin main
