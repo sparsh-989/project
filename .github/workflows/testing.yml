@@ -1,7 +1,7 @@
 name: Update example.txt
 
 on:
-  pull_request:
+  push:
     branches-ignore:
       - main
     paths:
@@ -14,8 +14,6 @@ jobs:
     steps:
     - name: Checkout current branch
       uses: actions/checkout@v2
-      with:
-        ref: ${{ github.head_ref }}
 
     - name: Checkout main branch
       run: |
