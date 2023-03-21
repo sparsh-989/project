@@ -1,7 +1,9 @@
-name: Update tsc.json
+name: Update tsc.json with new member from CODEOWNERS
 
 on:
   push:
+    branches-ignore:
+      - main
     paths:
       - 'CODEOWNERS'
 
@@ -13,38 +15,37 @@ jobs:
     - name: Checkout current branch
       uses: actions/checkout@v2
 
-    - name: Install jq
-      run: sudo apt-get install jq
-
-    - name: Extract owner and repo from CODEOWNERS
-      id: extract_info
+    - name: Checkout main branch
       run: |
-        username=$(grep -oP 'test\.txt \@(\w+)' CODEOWNERS | grep -oP '\@\w+' | sed 's/@//')
-        repo_name=$(basename $(git remote get-url origin) .git)
-        echo "::set-output name=username::$username"
-        echo "::set-output name=repo_name::$repo_name"
+        git fetch origin main:main
+        git checkout main
 
-    - name: Check if owner exists in tsc.json
-      id: check_owner
+    - name: Extract username and check if it exists in tsc.json
+      id: check_user
       run: |
-        username="${{ steps.extract_info.outputs.username }}"
-        found=$(jq ".[] | select(.github == \"$username\")" tsc.json)
-        echo "::set-output name=found::$found"
+        USERNAME=$(grep "test.txt" CODEOWNERS | awk '{print $2}' | sed 's/@//')
+        REPO_NAME=$(basename `git rev-parse --show-toplevel`)
+        EXISTS=$(jq '.[] | select(.github == '\"$USERNAME\"')' tsc.json)
+        echo "::set-output name=username::$USERNAME"
+        echo "::set-output name=repo_name::$REPO_NAME"
+        echo "::set-output name=exists::$EXISTS"
 
     - name: Add new member to tsc.json
-      if: steps.check_owner.outputs.found == ''
+      if: steps.check_user.outputs.exists == ''
       run: |
-        username="${{ steps.extract_info.outputs.username }}"
-        repo_name="${{ steps.extract_info.outputs.repo_name }}"
-        jq --arg github "$username" --arg repo "$repo_name" '. += [{ "name": "", "github": $github, "linkedin": "", "slack": "", "twitter": "", "availableForHire": false, "repos": [$repo] }]' tsc.json > tsc_temp.json
-        mv tsc_temp.json tsc.json
+        echo '{
+          "name": "New Member",
+          "github": "${{ steps.check_user.outputs.username }}",
+          "repos": [
+            "${{ steps.check_user.outputs.repo_name }}"
+          ]
+        }' >> tsc.json
 
     - name: Commit and push changes
-      if: steps.check_owner.outputs.found == ''
       run: |
         git config user.name "GitHub Actions Bot"
         git config user.email "your_email@example.com"
         git add tsc.json
-        git commit -m "Update tsc.json with a new member"
+        git commit -m "Update tsc.json with a new member from CODEOWNERS"
         git remote set-url origin "https://x-access-token:${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}@github.com/sparsh-989/project.git"
-        git push origin HEAD
+        git push origin main
