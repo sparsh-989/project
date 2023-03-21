@@ -20,6 +20,7 @@ while ((match = regex.exec(codeownersDiff)) !== null) {
   const githubUsername = match[2];
 
   const userIndex = tscJson.findIndex((user) => user.github === githubUsername);
+  console.log(userindex)
 
   if (userIndex === -1) {
     process.exit(0);
