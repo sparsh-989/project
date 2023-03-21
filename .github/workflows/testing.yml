@@ -2,8 +2,6 @@ name: Update tsc.json
 
 on:
   push:
-    branches-ignore:
-      - main
     paths:
       - 'CODEOWNERS'
 
@@ -15,30 +13,38 @@ jobs:
     - name: Checkout current branch
       uses: actions/checkout@v2
 
-    - name: Checkout main branch
+    - name: Install jq
+      run: sudo apt-get install jq
+
+    - name: Extract owner and repo from CODEOWNERS
+      id: extract_info
       run: |
-        git fetch origin main:main
-        git checkout main
+        username=$(grep -oP 'test\.txt \@(\w+)' CODEOWNERS | grep -oP '\@\w+' | sed 's/@//')
+        repo_name=$(basename $(git remote get-url origin) .git)
+        echo "::set-output name=username::$username"
+        echo "::set-output name=repo_name::$repo_name"
+
+    - name: Check if owner exists in tsc.json
+      id: check_owner
+      run: |
+        username="${{ steps.extract_info.outputs.username }}"
+        found=$(jq ".[] | select(.github == \"$username\")" tsc.json)
+        echo "::set-output name=found::$found"
 
     - name: Add new member to tsc.json
+      if: steps.check_owner.outputs.found == ''
       run: |
-        echo '{
-          "name": "New Member",
-          "github": "newmember",
-          "linkedin": "newmember",
-          "slack": "U01XXXXX",
-          "twitter": "newmember",
-          "availableForHire": true,
-          "repos": [
-            "new-repo"
-          ]
-        }' >> tsc.json
+        username="${{ steps.extract_info.outputs.username }}"
+        repo_name="${{ steps.extract_info.outputs.repo_name }}"
+        jq --arg github "$username" --arg repo "$repo_name" '. += [{ "name": "", "github": $github, "linkedin": "", "slack": "", "twitter": "", "availableForHire": false, "repos": [$repo] }]' tsc.json > tsc_temp.json
+        mv tsc_temp.json tsc.json
 
     - name: Commit and push changes
+      if: steps.check_owner.outputs.found == ''
       run: |
         git config user.name "GitHub Actions Bot"
         git config user.email "your_email@example.com"
         git add tsc.json
         git commit -m "Update tsc.json with a new member"
         git remote set-url origin "https://x-access-token:${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}@github.com/sparsh-989/project.git"
-        git push origin main
+        git push origin HEAD
