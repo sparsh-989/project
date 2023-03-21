@@ -20,8 +20,9 @@ jobs:
 
     - name: Checkout main branch
       run: |
-        git fetch origin main:main
-        git checkout main
+       git fetch origin ${{ github.ref }}:${{ github.ref }}
+       git checkout ${{ github.ref }}
+
 
     - name: Check if user exists and update tsc.json
       env:
