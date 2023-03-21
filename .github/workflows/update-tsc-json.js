@@ -3,9 +3,6 @@ const fs = require('fs');
 const path = require('path');
 
 const CODEOWNERS_PATH = path.join(process.cwd(), 'CODEOWNERS');
-const TSC_JSON_PATH = path.join(process.cwd(), 'tsc.json');
-
-const tscJson = require(TSC_JSON_PATH);
 
 const getLatestCommitDiff = () => {
   let cmd = "git diff ..main -- CODEOWNERS";
@@ -16,6 +13,11 @@ const codeownersDiff = getLatestCommitDiff();
 const regex = /^\+\s*(\w+)(?:\/\w+)*\s+@(\w+)/gm;
 let match;
 console.log(codeownersDiff)
+
+execSync("git checkout main", { encoding: 'utf8' });
+const TSC_JSON_PATH = path.join(process.cwd(), 'tsc.json');
+const tscJson = require(TSC_JSON_PATH);
+
 while ((match = regex.exec(codeownersDiff)) !== null) {
   const repoName = match[1];
   const githubUsername = match[2];
@@ -32,5 +34,4 @@ while ((match = regex.exec(codeownersDiff)) !== null) {
   }
 }
 
-execSync("git checkout main", { encoding: 'utf8' });
 fs.writeFileSync(TSC_JSON_PATH, JSON.stringify(tscJson, null, 2));
