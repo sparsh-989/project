@@ -14,7 +14,7 @@ const getLatestCommitDiff = () => {
 const codeownersDiff = getLatestCommitDiff();
 const regex = /^\+\s*(\w+)(?:\/\w+)*\s+@(\w+)/gm;
 let match;
-
+console.log(match)
 while ((match = regex.exec(codeownersDiff)) !== null) {
   const repoName = match[1];
   const githubUsername = match[2];
