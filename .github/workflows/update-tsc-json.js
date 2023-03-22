@@ -16,6 +16,8 @@ execSync(`git checkout -`);
 const codeownersDiff = execSync(`git diff HEAD~1 HEAD -- ${CODEOWNERS_PATH}`, {
   encoding: "utf8",
 });
+console.log('codeownersDiff:', codeownersDiff);
+
 const regex = /^\+\s*(\w+)(?:\/\w+)*\s+@(\w+)/gm;
 let match;
 
@@ -24,6 +26,7 @@ const tscJson = JSON.parse(fs.readFileSync(TSC_JSON_PATH, "utf8"));
 
 // Iterate through the added lines in the codeowners file and update tsc.json
 while ((match = regex.exec(codeownersDiff)) !== null) {
+  console.log('Match found:', match);
   const repoName = match[1];
   const githubUsername = match[2];
 
@@ -31,6 +34,7 @@ while ((match = regex.exec(codeownersDiff)) !== null) {
 
   // If the user is not found in tsc.json, add the user with the new repo and blank slack and twitter fields
   if (userIndex === -1) {
+    console.log('Adding new user:', githubUsername);
     tscJson.push({
       github: githubUsername,
       slack: "",
@@ -38,7 +42,7 @@ while ((match = regex.exec(codeownersDiff)) !== null) {
       repos: [repoName],
     });
   } else if (!tscJson[userIndex].repos.includes(repoName)) {
-    // If the user is found and the repo is not already in the repos array, add it
+    console.log('Adding repo to existing user:', githubUsername);
     tscJson[userIndex].repos.push(repoName);
   }
 }
