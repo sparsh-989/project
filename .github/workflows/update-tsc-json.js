@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const CODEOWNERS_PATH = process.argv[2];
-const TSC_JSON_PATH = path.join(process.cwd(), 'tsc.json');
+const TSC_JSON_PATH = path.join(process.env.TSC_JSON_PATH, 'tsc.json');
 
 const tscJson = require(TSC_JSON_PATH);
 
