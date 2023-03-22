@@ -1,33 +1,44 @@
-const { execSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
+const { execSync } = require("child_process");
+const fs = require("fs");
+const path = require("path");
 
 const CODEOWNERS_PATH = process.argv[2];
-const MAIN_BRANCH_REF = 'refs/heads/main';
+const MAIN_BRANCH_REF = "refs/heads/main";
 
 // Checkout the main branch and get the path to tsc.json
 execSync(`git checkout ${MAIN_BRANCH_REF}`);
-const TSC_JSON_PATH = path.join(process.cwd(), 'tsc.json');
+const TSC_JSON_PATH = path.join(process.cwd(), "tsc.json");
 
 // Switch back to the branch where changes were made
 execSync(`git checkout -`);
 
 // Read the codeowners file diff between the latest commit and the previous commit
-const codeownersDiff = execSync(`git diff HEAD~1 HEAD -- ${CODEOWNERS_PATH}`, { encoding: 'utf8' });
+const codeownersDiff = execSync(`git diff HEAD~1 HEAD -- ${CODEOWNERS_PATH}`, {
+  encoding: "utf8",
+});
 const regex = /^\+\s*(\w+)(?:\/\w+)*\s+@(\w+)/gm;
 let match;
 
 // Read the tsc.json file
-const tscJson = JSON.parse(fs.readFileSync(TSC_JSON_PATH, 'utf8'));
+const tscJson = JSON.parse(fs.readFileSync(TSC_JSON_PATH, "utf8"));
 
 // Iterate through the added lines in the codeowners file and update tsc.json
 while ((match = regex.exec(codeownersDiff)) !== null) {
   const repoName = match[1];
   const githubUsername = match[2];
 
-  const userIndex = tscJson.findIndex((user) => user.github === githubUsername);
+  let userIndex = tscJson.findIndex((user) => user.github === githubUsername);
 
-  if (userIndex !== -1 && !tscJson[userIndex].repos.includes(repoName)) {
+  // If the user is not found in tsc.json, add the user with the new repo and blank slack and twitter fields
+  if (userIndex === -1) {
+    tscJson.push({
+      github: githubUsername,
+      slack: "",
+      twitter: "",
+      repos: [repoName],
+    });
+  } else if (!tscJson[userIndex].repos.includes(repoName)) {
+    // If the user is found and the repo is not already in the repos array, add it
     tscJson[userIndex].repos.push(repoName);
   }
 }
