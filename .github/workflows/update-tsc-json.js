@@ -2,28 +2,24 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-const CODEOWNERS_PATH = path.join(process.cwd(), 'CODEOWNERS');
+const CODEOWNERS_PATH = process.argv[2];
+const TSC_JSON_PATH = path.join(process.cwd(), 'tsc.json');
+
+const tscJson = require(TSC_JSON_PATH);
 
 const getLatestCommitDiff = () => {
-  let cmd = "git diff ..main -- CODEOWNERS";
-  return execSync(cmd, { encoding: 'utf8' });
+  return execSync(`git diff HEAD^ HEAD -- ${CODEOWNERS_PATH}`, { encoding: 'utf8' });
 };
 
 const codeownersDiff = getLatestCommitDiff();
 const regex = /^\+\s*(\w+)(?:\/\w+)*\s+@(\w+)/gm;
 let match;
-console.log(codeownersDiff)
-
-execSync("git checkout main", { encoding: 'utf8' });
-const TSC_JSON_PATH = path.join(process.cwd(), 'tsc.json');
-const tscJson = require(TSC_JSON_PATH);
 
 while ((match = regex.exec(codeownersDiff)) !== null) {
   const repoName = match[1];
   const githubUsername = match[2];
 
   const userIndex = tscJson.findIndex((user) => user.github === githubUsername);
-  console.log(userindex)
 
   if (userIndex === -1) {
     process.exit(0);
