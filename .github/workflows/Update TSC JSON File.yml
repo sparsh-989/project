@@ -14,11 +14,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
-          ref: ${{ github.ref }}
           fetch-depth: 0
 
+      - name: Find TSC JSON file
+        id: find-tsc-json
+        run: echo "::set-output name=path::$(git rev-parse --show-toplevel)/tsc.json"
+
       - name: Update TSC JSON file
-        run: node .github/workflows/update-tsc-json.js "${GITHUB_WORKSPACE}/$(dirname ${GITHUB_EVENT_PATH})/CODEOWNERS"
+        run: node .github/workflows/update-tsc-json.js "${{ github.event_path }}"
 
       - name: Commit and push changes
         if: success()
