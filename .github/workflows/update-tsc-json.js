@@ -4,6 +4,7 @@ const path = require("path");
 
 const CODEOWNERS_PATH = process.argv[2];
 const MAIN_BRANCH_REF = "refs/heads/main";
+console.log(`CODEOWNERS_PATH: ${CODEOWNERS_PATH}`);
 
 // Checkout the main branch and get the path to tsc.json
 execSync(`git checkout ${MAIN_BRANCH_REF}`);
