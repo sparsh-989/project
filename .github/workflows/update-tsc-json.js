@@ -3,29 +3,28 @@ const fs = require('fs');
 const path = require('path');
 
 const CODEOWNERS_PATH = process.argv[2];
-const TSC_JSON_PATH = path.join(process.env.TSC_JSON_PATH, 'tsc.json');
+const MAIN_BRANCH_REF = 'refs/heads/main';
 
-const tscJson = require(TSC_JSON_PATH);
+// Checkout the main branch and get the path to tsc.json
+execSync(`git checkout ${MAIN_BRANCH_REF}`);
+const TSC_JSON_PATH = path.join(process.cwd(), 'tsc.json');
 
-const getLatestCommitDiff = () => {
-  return execSync(`git diff HEAD^ HEAD -- ${CODEOWNERS_PATH}`, { encoding: 'utf8' });
-};
+// Switch back to the branch where changes were made
+execSync(`git checkout -`);
 
-const codeownersDiff = getLatestCommitDiff();
+// Read the codeowners file
+const codeownersDiff = execSync(`git diff ${MAIN_BRANCH_REF} -- ${CODEOWNERS_PATH}`, { encoding: 'utf8' });
 const regex = /^\+\s*(\w+)(?:\/\w+)*\s+@(\w+)/gm;
 let match;
 
+// Iterate through the added lines in the codeowners file and update tsc.json
 while ((match = regex.exec(codeownersDiff)) !== null) {
   const repoName = match[1];
   const githubUsername = match[2];
 
   const userIndex = tscJson.findIndex((user) => user.github === githubUsername);
 
-  if (userIndex === -1) {
-    process.exit(0);
-  }
-
-  if (!tscJson[userIndex].repos.includes(repoName)) {
+  if (userIndex !== -1 && !tscJson[userIndex].repos.includes(repoName)) {
     tscJson[userIndex].repos.push(repoName);
   }
 }
