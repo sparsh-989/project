@@ -24,7 +24,7 @@ jobs:
           fetch-depth: 0
 
       - name: Update TSC JSON file
-        run: node .github/workflows/update-tsc-json.js "${GITHUB_WORKSPACE}/.github/CODEOWNERS"
+        run: node .github/workflows/update-tsc-json.js "${GITHUB_WORKSPACE}/CODEOWNERS"
 
       - name: Commit and push changes
         if: success()
