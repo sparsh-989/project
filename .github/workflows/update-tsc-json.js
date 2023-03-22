@@ -12,8 +12,8 @@ const TSC_JSON_PATH = path.join(process.cwd(), 'tsc.json');
 // Switch back to the branch where changes were made
 execSync(`git checkout -`);
 
-// Read the codeowners file
-const codeownersDiff = execSync(`git diff ${MAIN_BRANCH_REF} -- ${CODEOWNERS_PATH}`, { encoding: 'utf8' });
+// Read the codeowners file diff between the latest commit and the previous commit
+const codeownersDiff = execSync(`git diff HEAD~1 HEAD -- ${CODEOWNERS_PATH}`, { encoding: 'utf8' });
 const regex = /^\+\s*(\w+)(?:\/\w+)*\s+@(\w+)/gm;
 let match;
 
