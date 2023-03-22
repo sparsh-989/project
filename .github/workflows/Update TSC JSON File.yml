@@ -11,8 +11,14 @@ jobs:
   update-tsc-json:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
       - name: Update TSC JSON file
-        run: node .github/workflows/update-tsc-json.js
+        run: node .github/workflows/update-tsc-json.js "${GITHUB_WORKSPACE}/$(dirname ${GITHUB_EVENT_PATH})/CODEOWNERS"
 
       - name: Commit and push changes
         if: success()
