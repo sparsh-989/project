@@ -17,6 +17,9 @@ const codeownersDiff = execSync(`git diff ${MAIN_BRANCH_REF} -- ${CODEOWNERS_PAT
 const regex = /^\+\s*(\w+)(?:\/\w+)*\s+@(\w+)/gm;
 let match;
 
+// Read the tsc.json file
+const tscJson = JSON.parse(fs.readFileSync(TSC_JSON_PATH, 'utf8'));
+
 // Iterate through the added lines in the codeowners file and update tsc.json
 while ((match = regex.exec(codeownersDiff)) !== null) {
   const repoName = match[1];
