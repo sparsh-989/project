@@ -14,14 +14,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
-          ref: ${{ github.ref }}
+         
           fetch-depth: 0
 
       - name: Update TSC JSON file
         run: |
           export CODEOWNERS_PATH=$(git diff-tree --no-commit-id --name-only -r HEAD | grep '/CODEOWNERS')
           node .github/workflows/update-tsc-json.js
-
       - name: Commit and push changes
         run: |
           git config user.name "GitHub Action"
