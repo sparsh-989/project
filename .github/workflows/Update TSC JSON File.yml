@@ -18,7 +18,9 @@ jobs:
           fetch-depth: 0
 
       - name: Update TSC JSON file
-        run: node .github/workflows/update-tsc-json.js ${{ github.workspace }}/CODEOWNERS
+        run: |
+          export CODEOWNERS_PATH=$(git diff-tree --no-commit-id --name-only -r HEAD | grep '/CODEOWNERS')
+          node .github/workflows/update-tsc-json.js
 
       - name: Commit and push changes
         run: |
