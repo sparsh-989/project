@@ -58,4 +58,4 @@ while ((match = regex.exec(codeownersDiff)) !== null) {
   }
 }
 
-fs.writeFileSync(TSC_JSON_PATH, JSON.stringify(tscJson
+fs.writeFileSync(TSC_JSON_PATH, JSON.stringify(tscJson, null, 2));
