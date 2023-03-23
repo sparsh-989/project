@@ -22,9 +22,6 @@ jobs:
         with:
           node-version: 14
 
-      - name: Install dependencies
-        run: npm ci
-
       - name: Update TSC JSON file
         run: node .github/workflows/update-tsc-json.js
 
