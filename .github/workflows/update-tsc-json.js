@@ -2,7 +2,7 @@ const { execSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 
-const MAIN_BRANCH_REF = "refs/heads/main";
+const MAIN_BRANCH_REF = "main";
 
 // Find the path to the modified CODEOWNERS file
 const modifiedFiles = execSync("git diff --name-only HEAD~1 HEAD", {
