@@ -27,6 +27,7 @@ const tscJsonContent = execSync(`git show ${MAIN_BRANCH_REF}:tsc.json`, {
 const tscJson = JSON.parse(tscJsonContent);
 
 // Read the codeowners file diff between the latest commit and the previous commit
+execSync(`git fetch origin ${MAIN_BRANCH_REF}`);
 const codeownersDiff = execSync(`git diff HEAD~1 HEAD -- ${CODEOWNERS_PATH}`, {
   encoding: "utf8",
 });
