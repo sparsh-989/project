@@ -8,6 +8,7 @@ const MAIN_BRANCH_REF = "refs/heads/main";
 const modifiedFiles = execSync("git diff --name-only HEAD~1 HEAD", {
   encoding: "utf8",
 });
+console.log("Modified files:", modifiedFiles);
 const modifiedCodeowners = modifiedFiles
   .split("\n")
   .find((file) => file.endsWith("/CODEOWNERS"));
