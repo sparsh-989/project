@@ -2,7 +2,7 @@ const { execSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 
-const CODEOWNERS_PATH = path.join(process.env.GITHUB_WORKSPACE, process.argv[2]);
+const CODEOWNERS_PATH = path.join(process.argv[2]);
 const MAIN_BRANCH_REF = "refs/heads/main";
 console.log(`CODEOWNERS_PATH: ${CODEOWNERS_PATH}`);
 
