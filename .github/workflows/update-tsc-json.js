@@ -2,8 +2,22 @@ const { execSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 
-const CODEOWNERS_PATH = process.argv[2];
 const MAIN_BRANCH_REF = "refs/heads/main";
+
+// Find the path to the modified CODEOWNERS file
+const modifiedFiles = execSync("git diff --name-only HEAD~1 HEAD", {
+  encoding: "utf8",
+});
+const modifiedCodeowners = modifiedFiles
+  .split("\n")
+  .find((file) => file.endsWith("/CODEOWNERS"));
+
+if (!modifiedCodeowners) {
+  console.error("No modified CODEOWNERS file found.");
+  process.exit(1);
+}
+
+const CODEOWNERS_PATH = modifiedCodeowners;
 console.log(`CODEOWNERS_PATH: ${CODEOWNERS_PATH}`);
 
 // Checkout the main branch and get the path to tsc.json
