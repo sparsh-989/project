@@ -5,7 +5,7 @@ const path = require("path");
 const MAIN_BRANCH_REF = "refs/heads/main";
 
 // Find the path to the modified CODEOWNERS file
-const modifiedFiles = execSync("git diff --name-only origin/main", {
+const modifiedFiles = execSync("git diff --name-only HEAD~1 HEAD", {
   encoding: "utf8",
 });
 const modifiedCodeowners = modifiedFiles
@@ -27,24 +27,18 @@ const TSC_JSON_PATH = path.join(process.cwd(), "tsc.json");
 // Switch back to the branch where changes were made
 execSync(`git checkout -`);
 
-// Read the codeowners file diff between the main branch and the current branch
-const codeownersDiff = execSync(`git diff origin/main...HEAD -- ${CODEOWNERS_PATH}`, {
-  encoding: "utf8",
-});
-console.log('codeownersDiff:', codeownersDiff);
-
 // Read the content of the CODEOWNERS file
 const codeowners = fs.readFileSync(CODEOWNERS_PATH, "utf8");
 console.log('CODEOWNERS file:', codeowners);
 
-const regex = /^\+\s*(\w+)(?:\/\w+)*\s+@(\w+)/gm;
+const regex = /^(\w+)(?:\/\w+)*\s+@(\w+)/gm;
 let match;
 
 // Read the tsc.json file
 const tscJson = JSON.parse(fs.readFileSync(TSC_JSON_PATH, "utf8"));
 
-// Iterate through the added lines in the codeowners file and update tsc.json
-while ((match = regex.exec(codeownersDiff)) !== null) {
+// Iterate through the lines in the codeowners file and update tsc.json
+while ((match = regex.exec(codeowners)) !== null) {
   console.log('Match found:', match);
   const repoName = match[1];
   const githubUsername = match[2];
