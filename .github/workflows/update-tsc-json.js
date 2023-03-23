@@ -19,6 +19,10 @@ const codeownersDiff = execSync(`git diff HEAD~1 HEAD -- ${CODEOWNERS_PATH}`, {
 });
 console.log('codeownersDiff:', codeownersDiff);
 
+// Read the content of the CODEOWNERS file
+const codeowners = fs.readFileSync(CODEOWNERS_PATH, "utf8");
+console.log('CODEOWNERS file:', codeowners);
+
 const regex = /^\+\s*(\w+)(?:\/\w+)*\s+@(\w+)/gm;
 let match;
 
