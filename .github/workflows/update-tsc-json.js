@@ -5,12 +5,9 @@ const path = require("path");
 const MAIN_BRANCH_REF = "refs/heads/main";
 
 // Find the path to the modified CODEOWNERS file
-const modifiedFiles = execSync("git log -1 --pretty=format:'' --name-only HEAD", {
+const modifiedFiles = execSync("git diff --name-only origin/main", {
   encoding: "utf8",
 });
-
-
-console.log("Modified files:", modifiedFiles);
 const modifiedCodeowners = modifiedFiles
   .split("\n")
   .find((file) => file.endsWith("/CODEOWNERS"));
@@ -30,8 +27,8 @@ const TSC_JSON_PATH = path.join(process.cwd(), "tsc.json");
 // Switch back to the branch where changes were made
 execSync(`git checkout -`);
 
-// Read the codeowners file diff between the latest commit and the previous commit
-const codeownersDiff = execSync(`git diff HEAD~1 HEAD -- ${CODEOWNERS_PATH}`, {
+// Read the codeowners file diff between the main branch and the current branch
+const codeownersDiff = execSync(`git diff origin/main...HEAD -- ${CODEOWNERS_PATH}`, {
   encoding: "utf8",
 });
 console.log('codeownersDiff:', codeownersDiff);
