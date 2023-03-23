@@ -58,14 +58,7 @@ while ((match = regex.exec(codeownersDiff)) !== null) {
   }
 }
 
-// Write the updated tsc.json to a temporary file
-const tempTscJsonPath = "temp_tsc.json";
-fs.writeFileSync(tempTscJsonPath, JSON.stringify(tscJson, null, 2));
-
-// Stage, commit, and push the updated tsc.json file directly to the main branch
-execSync(`git add ${tempTscJsonPath}`);
-execSync(`git commit -m "Update tsc.json"`);
-execSync(`git push origin HEAD:${MAIN_BRANCH_REF}`);
-
-// Remove the temporary tsc.json file
-fs.unlinkSync(tempTscJsonPath);
+// Checkout the main branch, update the tsc.json file, and switch back to the current branch
+execSync(`git checkout ${MAIN_BRANCH_REF}`);
+fs.writeFileSync("tsc.json", JSON.stringify(tscJson, null, 2));
+execSync(`git checkout -`);
