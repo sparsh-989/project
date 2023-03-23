@@ -20,21 +20,28 @@ if (!modifiedCodeowners) {
 const CODEOWNERS_PATH = modifiedCodeowners;
 console.log(`CODEOWNERS_PATH: ${CODEOWNERS_PATH}`);
 
-// Read the tsc.json file from the main branch
-const tscJsonContent = execSync(`git show ${MAIN_BRANCH_REF}:tsc.json`, {
-  encoding: "utf8",
-});
-const tscJson = JSON.parse(tscJsonContent);
+// Checkout the main branch and get the path to tsc.json
+execSync(`git checkout ${MAIN_BRANCH_REF}`);
+const TSC_JSON_PATH = path.join(process.cwd(), "tsc.json");
+
+// Switch back to the branch where changes were made
+execSync(`git checkout -`);
 
 // Read the codeowners file diff between the latest commit and the previous commit
-execSync(`git fetch origin ${MAIN_BRANCH_REF}`);
 const codeownersDiff = execSync(`git diff HEAD~1 HEAD -- ${CODEOWNERS_PATH}`, {
   encoding: "utf8",
 });
 console.log('codeownersDiff:', codeownersDiff);
 
+// Read the content of the CODEOWNERS file
+const codeowners = fs.readFileSync(CODEOWNERS_PATH, "utf8");
+console.log('CODEOWNERS file:', codeowners);
+
 const regex = /^\+\s*(\w+)(?:\/\w+)*\s+@(\w+)/gm;
 let match;
+
+// Read the tsc.json file
+const tscJson = JSON.parse(fs.readFileSync(TSC_JSON_PATH, "utf8"));
 
 // Iterate through the added lines in the codeowners file and update tsc.json
 while ((match = regex.exec(codeownersDiff)) !== null) {
@@ -59,7 +66,4 @@ while ((match = regex.exec(codeownersDiff)) !== null) {
   }
 }
 
-// Checkout the main branch, update the tsc.json file, and switch back to the current branch
-execSync(`git checkout ${MAIN_BRANCH_REF}`);
-fs.writeFileSync("tsc.json", JSON.stringify(tscJson, null, 2));
-execSync(`git checkout -`);
+fs.writeFileSync(TSC_JSON_PATH, JSON.stringify(tscJson, null, 2));
