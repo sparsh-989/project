@@ -5,9 +5,10 @@ const path = require("path");
 const MAIN_BRANCH_REF = "refs/heads/main";
 
 // Find the path to the modified CODEOWNERS file
-const modifiedFiles = execSync("git diff --name-only origin/main HEAD", {
+const modifiedFiles = execSync("git log -1 --pretty=format:'' --name-only HEAD", {
   encoding: "utf8",
 });
+
 
 console.log("Modified files:", modifiedFiles);
 const modifiedCodeowners = modifiedFiles
