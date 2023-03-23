@@ -17,15 +17,13 @@ jobs:
           ref: ${{ github.ref }}
           fetch-depth: 0
 
-      - name: Checkout main branch
-        uses: actions/checkout@v2
-        with:
-          ref: main
-          fetch-depth: 0
+      - name: Locate CODEOWNERS file
+        id: locate_codeowners
+        run: echo "::set-output name=path::$(find ${{ github.workspace }} -name 'CODEOWNERS' -type f)"
 
       - name: Update TSC JSON file
-        run: node .github/workflows/update-tsc-json.js ${{ github.workspace }}/CODEOWNERS
-
+        run: node .github/workflows/update-tsc-json.js ${{ steps.locate_codeowners.outputs.path }}
+        
       - name: Commit and push changes
         if: success()
         run: |
