@@ -52,8 +52,8 @@ for (const line of lines) {
   if (parts.length === 2) {
     const [repoName, ...rest] = parts[0].split("/");
 
-    const githubUsername = parts[1].trim();
-    records.push({ repoName, githubUsername });
+    const githubid = parts[1].trim();
+    records.push({ repoName, githubid });
   }
 }
 
