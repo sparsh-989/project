@@ -66,29 +66,31 @@ let match;
 // Read the tsc.json file
 execSync(`git checkout ${MAIN_BRANCH_REF}`);
 const tscJson = JSON.parse(fs.readFileSync(TSC_JSON_PATH, "utf8"));
-execSync(`git checkout -`);
+// Check if each github id from records is present in tsc.json
+for (const record of records) {
+  const githubid = record.githubid;
+  let found = false;
 
-// Iterate through the added lines in the codeowners file and update tsc.json
-while ((match = regex.exec(codeownersDiff)) !== null) {
-  console.log('Match found:', match);
-  const repoName = match[1];
-  const githubUsername = match[2];
+  for (const member of tscJson) {
+    if (member.github === githubid) {
+      found = true;
+      break;
+    }
+  }
 
-  let userIndex = tscJson.findIndex((user) => user.github === githubUsername);
-
-  // If the user is not found in tsc.json, add the user with the new repo and blank slack and twitter fields
-  if (userIndex === -1) {
-    console.log('Adding new user:', githubUsername);
-    tscJson.push({
-      github: githubUsername,
+  // If not found, add a new entry to tsc.json
+  if (!found) {
+    const newMember = {
+      name: "",
+      github: githubid,
+      linkedin: "",
       slack: "",
       twitter: "",
-      repos: [repoName],
-    });
-  } else if (!tscJson[userIndex].repos.includes(repoName)) {
-    console.log('Adding repo to existing user:', githubUsername);
-    tscJson[userIndex].repos.push(repoName);
+      availableForHire: false,
+      repos: [record.repoName],
+    };
+    tscJson.push(newMember);
   }
 }
-execSync(`git checkout ${MAIN_BRANCH_REF}`);
+
 fs.writeFileSync(TSC_JSON_PATH, JSON.stringify(tscJson, null, 2));
