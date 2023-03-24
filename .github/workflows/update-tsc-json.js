@@ -44,6 +44,20 @@ console.log('codeownersDiff:', codeownersDiff);
 
 // Read the content of the CODEOWNERS file
 const codeowners = fs.readFileSync(CODEOWNERS_PATH, "utf8");
+const lines = codeowners.split("\n");
+const records = [];
+
+for (const line of lines) {
+  const parts = line.split("@");
+  if (parts.length === 2) {
+    const [repoName, ...rest] = parts[0].split("/");
+
+    const githubUsername = parts[1].trim();
+    records.push({ repoName, githubUsername });
+  }
+}
+
+console.log(records);
 console.log('CODEOWNERS file:', codeowners);
 
 const regex = /^\+\s*(\w+)(?:\/\w+)*\s+@(\w+)/gm;
