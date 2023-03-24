@@ -20,19 +20,18 @@ if (!modifiedCodeowners) {
 const CODEOWNERS_PATH = modifiedCodeowners;
 console.log(`CODEOWNERS_PATH: ${CODEOWNERS_PATH}`);
 
+execSync(`git checkout ${MAIN_BRANCH_REF}`);
+const TSC_JSON_PATH = path.join(process.cwd(), "tsc.json");
+
 // Check if the main branch exists
 const branchExists = execSync(`git branch --list ${MAIN_BRANCH_REF}`, {
   encoding: "utf8",
 }).trim().length > 0;
 
 if (!branchExists) {
-  console.error(`The ${MAIN_BRANCH_REF} branch does not exist.`);
+  console.error(`Main branch ${MAIN_BRANCH_REF} does not exist.`);
   process.exit(1);
 }
-
-// Checkout the main branch and get the path to tsc.json
-execSync(`git checkout ${MAIN_BRANCH_REF}`);
-const TSC_JSON_PATH = path.join(process.cwd(), "tsc.json");
 
 // Switch back to the branch where changes were made
 execSync(`git checkout -`);
