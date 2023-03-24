@@ -71,9 +71,15 @@ for (const record of records) {
   const githubid = record.githubid;
   let found = false;
 
-  for (const member of tscJson) {
-    if (member.github === githubid) {
+  for (let i = 0; i < tscJson.length; i++) {
+    if (tscJson[i].github === githubid) {
       found = true;
+
+      // If the repoName is not already in the repos array of the member, add it
+      if (!tscJson[i].repos.includes(record.repoName)) {
+        tscJson[i].repos.push(record.repoName);
+      }
+
       break;
     }
   }
