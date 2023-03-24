@@ -78,4 +78,4 @@ while ((match = regex.exec(codeownersDiff)) !== null) {
 }
 execSync(`git checkout ${MAIN_BRANCH_REF}`);
 fs.writeFileSync(TSC_JSON_PATH, JSON.stringify(tscJson, null, 2));
-execSync(`git checkout -`);
+
