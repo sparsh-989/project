@@ -50,7 +50,9 @@ const regex = /^\+\s*(\w+)(?:\/\w+)*\s+@(\w+)/gm;
 let match;
 
 // Read the tsc.json file
+execSync(`git checkout ${MAIN_BRANCH_REF}`);
 const tscJson = JSON.parse(fs.readFileSync(TSC_JSON_PATH, "utf8"));
+execSync(`git checkout -`);
 
 // Iterate through the added lines in the codeowners file and update tsc.json
 while ((match = regex.exec(codeownersDiff)) !== null) {
