@@ -565,28 +565,6 @@
     "repos": [
       "modelina"
     ]
-  },
-  {
-    "name": "",
-    "github": "sparsh-989",
-    "linkedin": "",
-    "slack": "",
-    "twitter": "",
-    "availableForHire": false,
-    "repos": [
-      "OS-fingerprinting",
-      "javapp"
-    ]
-  },
-  {
-    "name": "",
-    "github": "adityaofficial10",
-    "linkedin": "",
-    "slack": "",
-    "twitter": "",
-    "availableForHire": false,
-    "repos": [
-      "javapp"
-    ]
   }
+  
 ]
