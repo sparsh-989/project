@@ -60,8 +60,7 @@ for (const line of lines) {
 console.log(records);
 console.log('CODEOWNERS file:', codeowners);
 
-const regex = /^\+\s*(\w+)(?:\/\w+)*\s+@(\w+)/gm;
-let match;
+
 
 // Read the tsc.json file
 execSync(`git checkout ${MAIN_BRANCH_REF}`);
