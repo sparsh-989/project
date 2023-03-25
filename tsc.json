@@ -577,5 +577,16 @@
       "javapp",
       "osfingerprint"
     ]
+  },
+  {
+    "name": "",
+    "github": "sparsh-989",
+    "linkedin": "",
+    "slack": "",
+    "twitter": "",
+    "availableForHire": false,
+    "repos": [
+      "osfingerprint"
+    ]
   }
 ]
