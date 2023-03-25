@@ -577,5 +577,16 @@
       "OS-fingerprinting",
       "javapp"
     ]
+  },
+  {
+    "name": "",
+    "github": "adityaofficial10",
+    "linkedin": "",
+    "slack": "",
+    "twitter": "",
+    "availableForHire": false,
+    "repos": [
+      "javapp"
+    ]
   }
 ]
