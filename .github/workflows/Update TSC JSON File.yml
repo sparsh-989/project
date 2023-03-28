@@ -29,8 +29,7 @@ jobs:
             git add tsc.json
             git commit -m "Update tsc.json with new CODEOWNERS information"
             const commitId = execSync("git rev-parse HEAD", { encoding: "utf8" }).trim();
-             console.log(`Commit ID: ${commitId}`);
-
+            echo "Commit ID: ${commitId}"
             git push
           else
             echo "No changes to tsc.json. Skipping commit and push."
