@@ -23,6 +23,7 @@ jobs:
 
       - name: Commit and push changes
         run: |
+          #!/bin/bash
           git config user.name "GitHub Action"
           git config user.email "action@github.com"
           if [[ -n $(git diff --exit-code tsc.json) ]]; then
