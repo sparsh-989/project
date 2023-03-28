@@ -20,7 +20,7 @@ jobs:
         run: |
           export CODEOWNERS_PATH=$(git diff-tree --no-commit-id --name-only -r HEAD | grep '/CODEOWNERS')
           node .github/workflows/update-tsc-json.js
-
+       
       - name: Commit and push changes
         run: |
           #!/bin/bash
@@ -30,9 +30,10 @@ jobs:
             git add tsc.json
             git commit -m "Update tsc.json with new CODEOWNERS information"
             commitId=$(git rev-parse HEAD)
-            echo "Commit ID: ${commitId}"
-            git show -s --format='%ae' ${commitId}
-            git push
+           commitId=$(git rev-parse HEAD)
+           authorEmail=$(git show -s --format='%ae' ${commitId})
+           echo "Author email: ${authorEmail}"
+           git push
           else
             echo "No changes to tsc.json. Skipping commit and push."
           fi
