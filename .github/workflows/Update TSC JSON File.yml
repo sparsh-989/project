@@ -29,7 +29,7 @@ jobs:
           if [[ -n $(git diff --exit-code tsc.json) ]]; then
             git add tsc.json
             git commit -m "Update tsc.json with new CODEOWNERS information"
-            const commitId = execSync("git rev-parse HEAD", { encoding: "utf8" }).trim();
+            commitId=$(git rev-parse HEAD)
             echo "Commit ID: ${commitId}"
             git push
           else
