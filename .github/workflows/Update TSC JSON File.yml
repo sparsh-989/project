@@ -33,6 +33,23 @@ jobs:
            commitId=$(git rev-parse HEAD)
            authorEmail=$(git show -s --format='%ae' ${commitId})
            echo "Author email: ${authorEmail}"
+            const { Octokit } = require("@octokit/core");
+            const octokit = new Octokit({
+              auth: "YOUR_PERSONAL_ACCESS_TOKEN",
+            });
+            const { data } = await octokit.request("GET /search/users", {
+              q: authorEmail,
+            });
+            if (data.items.length > 0) {
+              const user = data.items[0];
+              if (user.type === "Bot") {
+                console.log(`The author with email ${authorEmail} is a bot.`);
+              } else {
+                console.log(`The author with email ${authorEmail} is a human.`);
+              }
+            } else {
+              console.log(`No user found with email ${authorEmail}.`);
+            }
            git push
           else
             echo "No changes to tsc.json. Skipping commit and push."
