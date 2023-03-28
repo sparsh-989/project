@@ -25,24 +25,11 @@ jobs:
         run: |
           #!/bin/bash
           git config user.name "GitHub Action"
-          git config user.email 
+          git config user.email "action@github.com"
           if [[ -n $(git diff --exit-code tsc.json) ]]; then
             git add tsc.json
             git commit -m "Update tsc.json with new CODEOWNERS information"
             commitId=$(git rev-parse HEAD)
-           commitId=$(git rev-parse HEAD)
            authorEmail=$(git show -s --format='%ae' ${commitId})
            echo "Author email: ${authorEmail}"
-            # Get the author email of the latest commit
-            # Check whether the author is a bot or a human on GitHub
-            response=$(curl -s "https://api.github.com/search/users?q=${authorEmail}")
-            user_type=$(echo $response | jq -r '.items[0].type')
-            if [[ "$user_type" == "Bot" ]]; then
-            echo "The author with email ${authorEmail} is a bot."
-            else
-            echo "The author with email ${authorEmail} is a human."
-           fi
-            git push
-          else
-            echo "No changes to tsc.json. Skipping commit and push."
-          fi
+           
