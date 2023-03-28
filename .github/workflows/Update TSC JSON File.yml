@@ -31,6 +31,7 @@ jobs:
             git commit -m "Update tsc.json with new CODEOWNERS information"
             commitId=$(git rev-parse HEAD)
             echo "Commit ID: ${commitId}"
+            git show -s --format='%ae' ${commitId}
             git push
           else
             echo "No changes to tsc.json. Skipping commit and push."
