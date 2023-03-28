@@ -585,7 +585,8 @@
     "twitter": "",
     "availableForHire": false,
     "repos": [
-      "osfingerprint"
+      "osfingerprint",
+      "javapp"
     ]
   }
 ]
