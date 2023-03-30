@@ -17,4 +17,5 @@ jobs:
       - name: Display commit ID and message
         run: |
           echo "Hello"
-          echo "Commit ID: ${{ github.sha }}"
+          shortCommitId=$(echo "${{ github.sha }}" | cut -c 1-7)
+          echo "Commit ID: $shortCommitId"
