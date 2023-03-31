@@ -32,4 +32,5 @@ jobs:
             commitId=$(git rev-parse HEAD)
            authorEmail=$(git show -s --format='%ae' ${commitId})
            echo "Author email: ${authorEmail}"
+           git push
            
