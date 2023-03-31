@@ -1,10 +1,10 @@
 const { Octokit } = require("@octokit/core");
 
 const octokit = new Octokit({
-  auth: "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",
+  auth: "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",
 });
-const owner = "Saurabh-Mokashi"; // Replace with the repository owner's username
-const repo = "push_swap"; // Replace with the repository name
+const owner = "Sparsh-989"; // Replace with the repository owner's username
+const repo = "project"; // Replace with the repository name
 const fullCommitId = process.argv[2]; // Get the full commit ID from the command line argument
 const commitId = fullCommitId.slice(0, 7); // Extract the first 7 characters of the commit ID
 
