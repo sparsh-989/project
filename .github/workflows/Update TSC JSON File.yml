@@ -29,8 +29,10 @@ jobs:
           if [[ -n $(git diff --exit-code tsc.json) ]]; then
             git add tsc.json
             git commit -m "Update tsc.json with new CODEOWNERS information"
-            commitId=$(git rev-parse HEAD)
+             commitId=$(git rev-parse HEAD)
            authorEmail=$(git show -s --format='%ae' ${commitId})
            echo "Author email: ${authorEmail}"
-           git push
-           
+            git push
+          else
+            echo "No changes to tsc.json. Skipping commit and push."
+          fi
