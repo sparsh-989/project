@@ -20,19 +20,20 @@ jobs:
         run: |
           export CODEOWNERS_PATH=$(git diff-tree --no-commit-id --name-only -r HEAD | grep '/CODEOWNERS')
           node .github/workflows/update-tsc-json.js
-       
       - name: Commit and push changes
         run: |
-          #!/bin/bash
-          git config user.name "GitHub Action"
-          git config user.email "action@github.com"
-          if [[ -n $(git diff --exit-code tsc.json) ]]; then
-            git add tsc.json
-            git commit -m "Update tsc.json with new CODEOWNERS information"
-             commitId=$(git rev-parse HEAD)
-           authorEmail=$(git show -s --format='%ae' ${commitId})
+           git config user.name "GitHub Action"
+           git config user.email "action@github.com"
+           if [[ -n $(git diff --exit-code tsc.json) ]]; then
+           git add tsc.json
+           git commit -m "Update tsc.json with new CODEOWNERS information"
+           COMMITID=$(git rev-parse HEAD)
+           authorEmail=$(git show -s --format='%ae' ${COMMITID})
            echo "Author email: ${authorEmail}"
-            git push
-          else
-            echo "No changes to tsc.json. Skipping commit and push."
-          fi
+           git push
+           node .github/workflows/script.js ${COMMITID}
+           else
+           echo "No changes to tsc.json. Skipping commit and push."
+           fi
+       
+     
