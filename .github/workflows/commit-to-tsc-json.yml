@@ -25,5 +25,5 @@ jobs:
       - name: Run script
         env:
          COMMIT_ID: ${{ github.sha }}
-        run: node ./path/to/script.js $COMMIT_ID
+        run: node .github/workflows/script.js $COMMIT_ID
 
