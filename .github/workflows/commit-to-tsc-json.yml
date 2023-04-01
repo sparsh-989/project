@@ -1,7 +1,10 @@
-name: Check Commit Author and Changes
-
 on:
   push:
+    branches:
+      - main
+    paths:
+      - 'tsc.json'
+  pull_request:
     branches:
       - main
     paths:
@@ -22,38 +25,19 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Get commit SHA
+        id: get_sha
+        run: |
+          if [ "${{ github.event_name }}" == "push" ]; then
+            echo "::set-output name=commit_sha::${{ github.sha }}"
+          else
+            echo "::set-output name=commit_sha::${{ github.event.pull_request.head.sha }}"
+          fi
+
       - name: Run script
         id: author_check
         env:
-          COMMIT_ID: ${{ github.sha }}
+          COMMIT_ID: ${{ steps.get_sha.outputs.commit_sha }}
         run: |
           USER_TYPE=$(node .github/workflows/script.js $COMMIT_ID)
           echo "::set-output name=user_type::$USER_TYPE"
-
-      - name: Check changes
-        if: ${{ steps.author_check.outputs.user_type == 'The user is a human.' }}
-        run: |
-          git diff HEAD^ HEAD -- tsc.json > changes.diff
-          cat changes.diff
-
-      - name: Block PR if name or repos changed
-        if: ${{ steps.author_check.outputs.user_type == 'The user is a human.' }}
-        run: |
-          CHANGES_FOUND=$(grep -E '^\+' changes.diff | grep -E '("name"|"repos")')
-          if [ ! -z "$CHANGES_FOUND" ]; then
-            echo "Blocking PR: Changes detected in 'name' or 'repos'"
-            exit 1
-          else
-            echo "No changes in 'name' or 'repos' detected"
-          fi
-
-      - name: Approve PR if slack, linkedin, or twitter changed
-        if: ${{ steps.author_check.outputs.user_type == 'The user is a human.' }}
-        run: |
-          CHANGES_FOUND=$(grep -E '^\+' changes.diff | grep -E '("slack"|"linkedin"|"twitter")')
-          if [ ! -z "$CHANGES_FOUND" ]; then
-            echo "Approving PR: Changes detected in 'slack', 'linkedin', or 'twitter'"
-            # Add logic here to approve the PR if needed
-          else
-            echo "No changes in 'slack', 'linkedin', or 'twitter' detected"
-          fi
