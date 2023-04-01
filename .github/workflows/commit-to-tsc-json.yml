@@ -23,6 +23,17 @@ jobs:
         run: npm ci
 
       - name: Run script
+        id: author_check
         env:
           COMMIT_ID: ${{ github.sha }}
-        run: node .github/workflows/script.js $COMMIT_ID
+        run: |
+          USER_TYPE=$(node .github/workflows/script.js $COMMIT_ID)
+          echo "::set-output name=user_type::$USER_TYPE"
+
+      - name: Human commit check
+        if: ${{ steps.author_check.outputs.user_type == 'The user is a human.' }}
+        run: echo "A human made the commit."
+
+      - name: Bot commit check
+        if: ${{ steps.author_check.outputs.user_type == 'The user is a bot.' }}
+        run: echo "A bot made the commit."
