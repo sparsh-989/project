@@ -33,13 +33,13 @@ jobs:
       - name: Check changes
         if: ${{ steps.author_check.outputs.user_type == 'The user is a human.' }}
         run: |
-          git diff --name-only HEAD^ HEAD > changed_files.txt
-          cat changed_files.txt
+          git diff HEAD^ HEAD -- tsc.json > changes.diff
+          cat changes.diff
 
       - name: Block PR if name or repos changed
         if: ${{ steps.author_check.outputs.user_type == 'The user is a human.' }}
         run: |
-          CHANGES_FOUND=$(grep -E '("name"|"repos")' changed_files.txt)
+          CHANGES_FOUND=$(grep -E '^\+' changes.diff | grep -E '("name"|"repos")')
           if [ ! -z "$CHANGES_FOUND" ]; then
             echo "Blocking PR: Changes detected in 'name' or 'repos'"
             exit 1
@@ -50,7 +50,7 @@ jobs:
       - name: Approve PR if slack, linkedin, or twitter changed
         if: ${{ steps.author_check.outputs.user_type == 'The user is a human.' }}
         run: |
-          CHANGES_FOUND=$(grep -E '("slack"|"linkedin"|"twitter")' changed_files.txt)
+          CHANGES_FOUND=$(grep -E '^\+' changes.diff | grep -E '("slack"|"linkedin"|"twitter")')
           if [ ! -z "$CHANGES_FOUND" ]; then
             echo "Approving PR: Changes detected in 'slack', 'linkedin', or 'twitter'"
             # Add logic here to approve the PR if needed
