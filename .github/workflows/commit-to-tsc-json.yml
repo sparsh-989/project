@@ -1,4 +1,4 @@
-name: Commit to tsc.json
+name: Check Human Edits
 
 on:
   push:
@@ -29,20 +29,11 @@ jobs:
         run: npm ci
 
       - name: Run script.js to check user type
-        id: check-user-type
-        run: echo "::set-output name=user_type::$(node .github/workflows/script.js ${{ github.event.pull_request.head.sha || github.sha }})"
-
-      - name: Set is_human variable
-        id: set-is-human
         run: |
-          if [ ${{ steps.check-user-type.outputs.user_type }} == "The user is a human." ]; then
-            echo "is_human=true" >> $GITHUB_ENV
-          else
-            echo "is_human=false" >> $GITHUB_ENV
-          fi
+          USER_TYPE=$(node .github/workflows/script.js ${{ github.event.pull_request.head.sha || github.sha }})
+          echo "user_type=$USER_TYPE" >> $GITHUB_ENV
 
-      - name: Print is_human variable
-        run: echo "is_human: ${{ env.is_human }}"
+      
 
       - name: Get changes in tsc.json
         run: |
@@ -50,7 +41,7 @@ jobs:
           git diff origin/main tsc.json > changes.diff
 
       - name: Ensure only allowed changes if the user is a human
-        if: ${{ env.is_human == 'true' }}
+        if: ${{ env.user_type == 'The user is a human.' }}
         run: |
           ALLOWED_CHANGES="twitter\|slack\|linkedin\|availableForHire"
           if grep -q -v -E "^[\+\-]( {4}$ALLOWED_CHANGES:)" changes.diff; then
