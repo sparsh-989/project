@@ -36,17 +36,19 @@ jobs:
         id: get_sha
         run: |
           if [ "${{ github.event_name }}" == "push" ]; then
-            echo "::set-output name=commit_sha::${{ github.sha }}"
+            echo "${{ github.sha }}" >> $GITHUB_STATE/commit_sha
           else
-            echo "::set-output name=commit_sha::${{ github.event.pull_request.head.sha }}"
+            echo "${{ github.event.pull_request.head.sha }}" >> $GITHUB_STATE/commit_sha
           fi
+
       - name: Run script
         id: author_check
         env:
           COMMIT_ID: ${{ steps.get_sha.outputs.commit_sha }}
         run: |
           USER_TYPE=$(node .github/workflows/script.js $COMMIT_ID)
-          echo "::set-output name=user_type::$USER_TYPE"
+          echo "${USER_TYPE}" >> $GITHUB_STATE/user_type
+
       - name: Get PR changes
         if: ${{ github.event_name == 'pull_request' }}
         id: get_pr_changes
@@ -54,33 +56,18 @@ jobs:
          PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           PR_CHANGES=$(node .github/workflows/getPRChanges/getPRChanges.js)
-          echo "$PR_CHANGES" >> pr_changes.json
-          echo "${{ github.event.pull_request.number }}" >> pull_request_number.txt
-          echo "::set-output name=pr_changes::$(cat pr_changes.json)"
-          echo "::set-output name=pull_request_number::$(cat pull_request_number.txt)"
+          echo "${PR_CHANGES}" >> $GITHUB_STATE/pr_changes
 
       - name: Check changes
-        if: ${{ steps.author_check.outputs.user_type == 'The user is a human.' }}
+        if: ${{ env.USER_TYPE == 'The user is a human.' }}
         run: |
           git diff ${{ github.event.pull_request.base.sha }} ${{ steps.get_sha.outputs.commit_sha }} -- tsc.json > changes.diff
           cat changes.diff
+
       - name: Block PR if name or repos changed
-        if: ${{ steps.author_check.outputs.user_type == 'The user is a human.' }}
+        if: ${{ env.USER_TYPE == 'The user is a human.' }}
         run: |
           CHANGES_FOUND=$(grep -E '^\+' changes.diff | grep -E '("name"|"repos")')
           if [ ! -z "$CHANGES_FOUND" ]; then
             echo "Blocking PR: Changes detected in 'name' or 'repos'"
-            exit 1
-          else
-            echo "No changes in 'name' or 'repos' detected"
-          fi
-      - name: Approve PR if slack, linkedin, or twitter changed
-        if: ${{ steps.author_check.outputs.user_type == 'The user is a human.' }}
-        run: |
-          CHANGES_FOUND=$(grep -E '^\+' changes.diff | grep -E '("slack"|"linkedin"|"twitter")')
-          if [ ! -z "$CHANGES_FOUND" ]; then
-            echo "Approving PR: Changes detected in 'slack', 'linkedin', or 'twitter'"
-            # Add logic here to approve the PR if needed
-          else
-            echo "No changes in 'slack', 'linkedin', or 'twitter' detected"
-          fi
+            exit
