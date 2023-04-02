@@ -1,4 +1,4 @@
-name: Check Human Edits
+name: Commit to tsc.json
 
 on:
   push:
