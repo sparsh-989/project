@@ -7,9 +7,6 @@ on:
     paths:
       - 'tsc.json'
 
-env:
-  NODE_VERSION: 16
-
 jobs:
   check-author:
     runs-on: ubuntu-latest
@@ -17,28 +14,34 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v2
 
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: '16.x'
+
+      - name: Install dependencies
+        run: npm install
 
       - name: Get parent commit
         id: parent-commit
-        run: echo "::set-env name=PARENT_COMMIT::$(git rev-parse HEAD~)"
+        run: echo "::set-output name=parent-commit::$(git rev-parse HEAD~)"
 
-      - name: Get previous version of tsc.json
-        run: git show ${{ env.PARENT_COMMIT }}:tsc.json > prev-tsc.json
-        shell: /usr/bin/bash -e {0}
-
-      - name: Get commit data and display Git diff
-        id: commit-data
+      - name: Get diff between current and previous version of tsc.json
+        id: diff-tsc-json
         env:
-          COMMIT_ID: ${{ github.sha }}
+          PARENT_COMMIT: ${{ steps.parent-commit.outputs.parent-commit }}
         run: |
-          diff=$(git diff --no-color prev-tsc.json tsc.json)
-          echo "::set-env name=DIFF::$diff"
-          node .github/workflows/script.js $COMMIT_ID
+          if [[ -n "${PARENT_COMMIT}" ]]; then
+            git show ${PARENT_COMMIT}:tsc.json > prev-tsc.json
+            git diff --no-color prev-tsc.json tsc.json > diff.txt || true
+          fi
+          echo "::set-output name=diff-path::diff.txt"
 
       - name: Display Git diff
-        if: env.DIFF != ''
-        run: echo "Git diff:${{ env.DIFF }}"
+        if: steps.diff-tsc-json.outputs.diff-path != ''
+        run: cat "${{ steps.diff-tsc-json.outputs.diff-path }}"
+
+      - name: Run script
+        env:
+          COMMIT_ID: ${{ github.sha }}
+        run: node .github/workflows/script.js $COMMIT_ID
