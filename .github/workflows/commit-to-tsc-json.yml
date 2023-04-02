@@ -56,8 +56,8 @@ jobs:
           PR_CHANGES=$(node .github/workflows/getPRChanges/getPRChanges.js)
           echo "$PR_CHANGES" >> pr_changes.json
           echo "${{ github.event.pull_request.number }}" >> pull_request_number.txt
-          echo "::set-env name=PR_CHANGES::$(cat pr_changes.json)"
-          echo "::set-env name=PULL_REQUEST_NUMBER::$(cat pull_request_number.txt)"
+          echo "::set-output name=pr_changes::$(cat pr_changes.json)"
+          echo "::set-output name=pull_request_number::$(cat pull_request_number.txt)"
 
       - name: Check changes
         if: ${{ steps.author_check.outputs.user_type == 'The user is a human.' }}
