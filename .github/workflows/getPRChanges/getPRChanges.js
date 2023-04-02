@@ -21,3 +21,4 @@ async function getPullRequestChanges() {
 module.exports = {
   getPullRequestChanges,
 };
+getPullRequestChanges().then((data) => console.log(JSON.stringify(data)));
