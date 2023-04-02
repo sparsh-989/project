@@ -30,9 +30,16 @@ jobs:
 
       - name: Run script.js to check user type
         id: check-user-type
+        run: node .github/workflows/script.js ${{ github.event.pull_request.head.sha || github.sha }} || true
+
+      - name: Set is_human variable
+        id: set-is-human
         run: |
-          node .github/workflows/script.js ${{ github.event.pull_request.head.sha || github.sha }}
-          echo "USER_TYPE_EXIT_CODE=$?" >> $GITHUB_ENV
+          if [ ${{ steps.check-user-type.outcome }} == "failure" ]; then
+            echo "::set-output name=is_human::true"
+          else
+            echo "::set-output name=is_human::false"
+          fi
 
       - name: Get changes in tsc.json
         run: |
@@ -40,7 +47,7 @@ jobs:
           git diff origin/main tsc.json > changes.diff
 
       - name: Ensure only allowed changes if the user is a human
-        if: ${{ env.USER_TYPE_EXIT_CODE == 1 }}
+        if: ${{ steps.set-is-human.outputs.is_human == 'true' }}
         run: |
           ALLOWED_CHANGES="twitter\|slack\|linkedin\|availableForHire"
           if grep -q -v -E "^[\+\-]( {4}$ALLOWED_CHANGES:)" changes.diff; then
