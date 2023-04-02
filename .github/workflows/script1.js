@@ -3,6 +3,7 @@ const { exec } = require('child_process');
 (async () => {
   try {
     const commitId = process.argv[2];
+    const userType = process.argv[3];
     const allowedChangesByHuman = ['linkedin', 'slack', 'twitter', 'availableForHire'];
 
     exec(`git diff ${commitId}^ ${commitId} -- tsc.json`, (error, stdout, stderr) => {
@@ -29,10 +30,12 @@ const { exec } = require('child_process');
         }
       }
 
-      if (allowedChanges) {
-        console.log('Changes made by a human are allowed.');
+      if (allowedChanges && userType === 'human') {
+        console.log('Valid changes.');
+      } else if (!allowedChanges && userType === 'bot') {
+        console.log('Valid changes.');
       } else {
-        console.log('Changes should be made by a bot.');
+        console.log('Invalid changes.');
       }
     });
   } catch (error) {
