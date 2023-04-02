@@ -24,7 +24,12 @@ jobs:
         with:
           node-version: 16
 
-      - name: Install dependencies
+      - name: Install dependencies for script
+        working-directory: .github/workflows
+        run: npm ci
+
+      - name: Install dependencies for getPRChanges
+        working-directory: .github/workflows/getPRChanges
         run: npm ci
 
       - name: Get commit SHA
@@ -47,7 +52,7 @@ jobs:
       - name: Get PR changes
         if: ${{ github.event_name == 'pull_request' }}
         run: |
-          PR_CHANGES=$(node .github/workflows/getPRChanges.js)
+          PR_CHANGES=$(node .github/workflows/getPRChanges/getPRChanges.js)
           echo "PR_CHANGES=$PR_CHANGES" >> $GITHUB_ENV
 
       - name: Check changes
