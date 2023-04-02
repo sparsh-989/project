@@ -1,3 +1,4 @@
+
 const { Octokit } = require("@octokit/rest");
 
 const octokit = new Octokit({
@@ -23,6 +24,6 @@ async function getPullRequestChanges() {
 
 getPullRequestChanges().then((data) => {
   console.log(JSON.stringify(data));
-  console.log(`::set-output name=pr_changes::${JSON.stringify(data.files)}`);
-  console.log(`::set-output name=pull_request_number::${data.pullRequestNumber}`);
+  console.log(`::set-env name=PR_CHANGES::${JSON.stringify(data.files)}`);
+  console.log(`::set-env name=PULL_REQUEST_NUMBER::${data.pullRequestNumber}`);
 });
