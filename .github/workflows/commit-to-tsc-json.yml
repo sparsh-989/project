@@ -19,18 +19,18 @@ jobs:
         with:
           node-version: 16
 
-      - name: Get previous version of tsc.json
-        id: get-prev-version
+      - name: Get previous file version
         run: |
-          git show HEAD^:tsc.json > prev-tsc.json
+          git show HEAD:tsc.json > prev-tsc.json
           echo "::set-output name=prev-file-path::prev-tsc.json"
 
       - name: Get commit data and display Git diff
         id: commit-data
         env:
           COMMIT_ID: ${{ github.sha }}
+          PREV_FILE: ${{ steps.get-prev-file.outputs.prev-file-path }}
         run: |
-          diff=$(git diff --no-color $(cat ${{ steps.get-prev-version.outputs.prev-file-path }}) tsc.json)
+          diff=$(git diff --no-color $PREV_FILE tsc.json)
           echo "::set-output name=diff::$diff"
           node .github/workflows/script.js $COMMIT_ID
 
