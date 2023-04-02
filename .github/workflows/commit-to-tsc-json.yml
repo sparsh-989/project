@@ -30,27 +30,28 @@ jobs:
 
       - name: Run script.js to check user type
         id: check-user-type
-        run: node .github/workflows/script.js ${{ github.event.pull_request.head.sha || github.sha }} || true
+        run: echo "::set-output name=user_type::$(node .github/workflows/script.js ${{ github.event.pull_request.head.sha || github.sha }})"
 
       - name: Set is_human variable
         id: set-is-human
         run: |
-          if [ ${{ steps.check-user-type.outcome }} == "failure" ]; then
+          if [ ${{ steps.check-user-type.outputs.user_type }} == "The user is a human." ]; then
             echo "is_human=true" >> $GITHUB_ENV
           else
             echo "is_human=false" >> $GITHUB_ENV
           fi
+      - name: Print is_human variable
+        run: echo "is_human:${{ env.is_human }}"
 
       - name: Get changes in tsc.json
         run: |
           git fetch origin main
           git diff origin/main tsc.json > changes.diff
-
       - name: Ensure only allowed changes if the user is a human
         if: ${{ env.is_human == 'true' }}
         run: |
           ALLOWED_CHANGES="twitter\|slack\|linkedin\|availableForHire"
           if grep -q -v -E "^[\+\-]( {4}$ALLOWED_CHANGES:)" changes.diff; then
-            echo "Error: Only changes to twitter, slack, linkedin, and availableForHire fields are allowed for human users."
+            echo "Error: Only changes to twitter, slack, linkedin, and availableForHire are allowed for human users."
             exit 1
           fi
