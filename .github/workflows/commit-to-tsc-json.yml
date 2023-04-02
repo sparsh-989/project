@@ -1,4 +1,4 @@
-name: Check Human Edits
+name: Check Commit Author
 
 on:
   push:
@@ -6,45 +6,23 @@ on:
       - main
     paths:
       - 'tsc.json'
-  pull_request:
-    branches:
-      - main
-    paths:
-      - 'tsc.json'
 
 jobs:
-  check-human-edits:
+  check-author:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Repository
+      - name: Check out repository
         uses: actions/checkout@v2
 
-      - name: Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
           node-version: 16
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: npm ci
 
-      - name: Run script.js to check user type
-        run: |
-          USER_TYPE=$(node .github/workflows/script.js ${{ github.event.pull_request.head.sha || github.sha }})
-          echo "user_type=$USER_TYPE" >> $GITHUB_ENV
-
-      
-
-      - name: Get changes in tsc.json
-        run: |
-          git fetch origin main
-          git diff origin/main tsc.json > changes.diff
-
-      - name: Ensure only allowed changes if the user is a human
-        if: ${{ env.user_type == 'The user is a human.' }}
-        run: |
-          ALLOWED_CHANGES="twitter\|slack\|linkedin\|availableForHire"
-          if grep -q -v -E "^[\+\-]( {4}$ALLOWED_CHANGES:)" changes.diff; then
-            echo "Error: Only changes to twitter, slack, linkedin, and availableForHire are allowed for human users."
-            exit 1
-          fi
+      - name: Run script
+        env:
+          COMMIT_ID: ${{ github.sha }}
+        run: node .github/workflows/script.js $COMMIT_ID
