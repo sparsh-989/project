@@ -1,20 +1,15 @@
-name: Check Commit Author
+name: Check Commit Author and Changes
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'tsc.json'
+  pull_request_target:
+    types: [opened, reopened, synchronize]
 
 jobs:
-  check-author:
+  check-author-and-changes:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
-        with:
-          fetch-depth: 2
 
       - name: Set up Node.js
         uses: actions/setup-node@v2
@@ -24,27 +19,33 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Get commit ID
+        id: commit
+        run: echo "::set-output name=commit_id::$(jq -r '.pull_request.head.sha' $GITHUB_EVENT_PATH)"
+
       - name: Run script.js
-        id: script_js
-        env:
-          COMMIT_ID: ${{ github.sha }}
-        run: |
-          output=$(node .github/workflows/script.js $COMMIT_ID)
-          echo "$output"
-          echo "$output" | grep -Eo "::set-output name=user_type::\S+" | awk -F '::' '{print $3}' > temp_usertype.txt
-          cat temp_usertype.txt
+        id: script
+        run: node .github/workflows/script.js ${{ steps.commit.outputs.commit_id }}
+
       - name: Run script1.js
+        id: script1
         env:
-          COMMIT_ID: ${{ github.sha }}
-          USER_TYPE: ${{ steps.script_js.outputs.user_type }}
-        run: node .github/workflows/script1.js $COMMIT_ID $USER_TYPE
-      - name: Block PR if changes are invalid
-      
+          USER_TYPE: ${{ steps.script.outputs.user_type }}
+        run: node .github/workflows/script1.js ${{ steps.commit.outputs.commit_id }} ${{ steps.script.outputs.user_type }}
+
+      - name: Check if changes are valid
+        id: valid_changes
+        run: echo "::set-output name=valid_changes::$([[ $USER_TYPE != 'Bot' && $VALID_CHANGES == 'true' ]] && echo true || echo false)"
+
+      - name: Block pull request for invalid changes
+        if: steps.valid_changes.outputs.valid_changes == 'false'
         run: |
-            if [ "$USER_TYPE" != "Bot" ] && [ "$VALID_CHANGES" == "false" ]; then
-            curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github.antiope-preview+json" \
-            "https://api.github.com/repos/$GITHUB_REPOSITORY/check-runs" \
-            -d '{"name": "Invalid changes", "head_sha": "'"${{ github.sha }}"'", "status": "completed", "conclusion": "failure", "output": {"title": "Invalid changes", "summary": "The changes made to tsc.json are not allowed. Please update the file and create a new pull request."}}'
-            exit 1
-            fi
+          curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          -H "Accept: application/vnd.github.antiope-preview+json" \
+          "https://api.github.com/repos/$GITHUB_REPOSITORY/check-runs" \
+          -d '{"name": "Invalid changes", "head_sha": "'"${{ steps.commit.outputs.commit_id }}"'", "status": "completed", "conclusion": "failure", "output": {"title": "Invalid changes", "summary": "The changes made to tsc.json are not allowed. Please update the file and create a new pull request."}}'
+          exit 1
+
+      - name: Allow pull request for valid changes
+        if: steps.valid_changes.outputs.valid_changes == 'true'
+        run: echo "Pull request is valid and can be merged."
