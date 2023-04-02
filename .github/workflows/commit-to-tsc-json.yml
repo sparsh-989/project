@@ -51,6 +51,9 @@ jobs:
 
       - name: Get PR changes
         if: ${{ github.event_name == 'pull_request' }}
+        id: get_pr_changes
+        env:
+         PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           PR_CHANGES=$(node .github/workflows/getPRChanges/getPRChanges.js)
           echo "PR_CHANGES=$PR_CHANGES" >> $GITHUB_ENV
