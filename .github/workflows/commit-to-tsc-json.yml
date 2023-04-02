@@ -25,11 +25,17 @@ jobs:
         run: npm ci
 
       - name: Run script.js
+        id: script_js
         env:
           COMMIT_ID: ${{ github.sha }}
-        run: node .github/workflows/script.js $COMMIT_ID
+        run: |
+          output=$(node .github/workflows/script.js $COMMIT_ID)
+          echo "$output"
+          echo "$output" | grep -Eo "::set-output name=user_type::\S+" | awk -F '::' '{print $3}' > temp_usertype.txt
+          cat temp_usertype.txt
 
       - name: Run script1.js
         env:
           COMMIT_ID: ${{ github.sha }}
-        run: node .github/workflows/script1.js $COMMIT_ID
+          USER_TYPE: ${{ steps.script_js.outputs.user_type }}
+        run: node .github/workflows/script1.js $COMMIT_ID $USER_TYPE
