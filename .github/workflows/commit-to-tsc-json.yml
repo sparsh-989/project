@@ -25,50 +25,49 @@ jobs:
           node-version: 16
 
       - name: Install dependencies for script
-        working-directory: .github/workflows
         run: npm ci
 
       - name: Install dependencies for getPRChanges
-        working-directory: .github/workflows/getPRChanges
-        run: npm ci
+        run: |
+          cd .github/workflows/getPRChanges
+          npm ci
+          cd ../..
 
       - name: Get commit SHA
         id: get_sha
         run: |
           if [ "${{ github.event_name }}" == "push" ]; then
-            echo "${{ github.sha }}" >> $GITHUB_ENV
+            echo "::set-output name=commit_sha::${{ github.sha }}"
           else
-            echo "${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
+            echo "::set-output name=commit_sha::${{ github.event.pull_request.head.sha }}"
           fi
 
       - name: Run script
         id: author_check
         env:
-          COMMIT_ID: ${{ env.COMMIT_SHA }}
+          COMMIT_ID: ${{ steps.get_sha.outputs.commit_sha }}
         run: |
           USER_TYPE=$(node .github/workflows/script.js $COMMIT_ID)
-          echo "${USER_TYPE}" >> $GITHUB_ENV
+          echo "::set-output name=user_type::$USER_TYPE"
 
       - name: Get PR changes
         if: ${{ github.event_name == 'pull_request' }}
         id: get_pr_changes
-        env:
-          PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           PR_CHANGES=$(node .github/workflows/getPRChanges/getPRChanges.js)
-          echo "${PR_CHANGES}" >> pr_changes.json
-          echo "${{ github.event.pull_request.number }}" >> pull_request_number.txt
-          echo "${PR_CHANGES}" >> $GITHUB_ENV
-          echo "${{ github.event.pull_request.number }}" >> $GITHUB_ENV
+          echo "$PR_CHANGES" > pr_changes.json
+          echo "${{ github.event.pull_request.number }}" > pull_request_number.txt
+          echo "::set-env name=PR_CHANGES::$(cat pr_changes.json)"
+          echo "::set-env name=PULL_REQUEST_NUMBER::$(cat pull_request_number.txt)"
 
       - name: Check changes
-        if: ${{ env.USER_TYPE == 'The user is a human.' }}
+        if: ${{ steps.author_check.outputs.user_type == 'The user is a human.' }} && ${{ github.event_name == 'pull_request' }}
         run: |
-          git diff ${{ github.event.pull_request.base.sha }} ${{ env.COMMIT_SHA }} -- tsc.json > changes.diff
+          git diff ${{ github.event.pull_request.base.sha }} ${{ steps.get_sha.outputs.commit_sha }} -- tsc.json > changes.diff
           cat changes.diff
 
       - name: Block PR if name or repos changed
-        if: ${{ env.USER_TYPE == 'The user is a human.' }}
+        if: ${{ steps.author_check.outputs.user_type == 'The user is a human.' }} && ${{ github.event_name == 'pull_request' }}
         run: |
           CHANGES_FOUND=$(grep -E '^\+' changes.diff | grep -E '("name"|"repos")')
           if [ ! -z "$CHANGES_FOUND" ]; then
@@ -79,12 +78,11 @@ jobs:
           fi
 
       - name: Approve PR if slack, linkedin, or twitter changed
-        if: ${{ env.USER_TYPE == 'The user is a human.' }}
+        if: ${{ steps.author_check.outputs.user_type == 'The user is a human.' }} && ${{ github.event_name == 'pull_request' }}
         run: |
           CHANGES_FOUND=$(grep -E '^\+' changes.diff | grep -E '("slack"|"linkedin"|"twitter")')
           if [ ! -z "$CHANGES_FOUND" ]; then
             echo "Approving PR: Changes detected in 'slack', 'linkedin', or 'twitter'"
             # Add logic here to approve the PR if needed
           else
-            echo "No changes in 'slack', 'linkedin', or 'twitter' detected"
-          fi
+            echo "No
