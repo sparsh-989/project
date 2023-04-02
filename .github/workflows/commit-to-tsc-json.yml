@@ -40,7 +40,6 @@ jobs:
           else
             echo "::set-output name=commit_sha::${{ github.event.pull_request.head.sha }}"
           fi
-
       - name: Run script
         id: author_check
         env:
@@ -48,7 +47,6 @@ jobs:
         run: |
           USER_TYPE=$(node .github/workflows/script.js $COMMIT_ID)
           echo "::set-output name=user_type::$USER_TYPE"
-
       - name: Get PR changes
         if: ${{ github.event_name == 'pull_request' }}
         id: get_pr_changes
@@ -56,16 +54,16 @@ jobs:
          PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           PR_CHANGES=$(node .github/workflows/getPRChanges/getPRChanges.js)
-          echo "PR_CHANGES=$PR_CHANGES" >> $GITHUB_ENV
-          echo "PULL_REQUEST_NUMBER=${{ github.event.pull_request.number }}" >> $GITHUB_ENV
-          echo "::set-output name=pull_request_number::${{ github.event.pull_request.number }}"
+          echo "$PR_CHANGES" >> pr_changes.json
+          echo "${{ github.event.pull_request.number }}" >> pull_request_number.txt
+          echo "::set-env name=PR_CHANGES::$(cat pr_changes.json)"
+          echo "::set-env name=PULL_REQUEST_NUMBER::$(cat pull_request_number.txt)"
 
       - name: Check changes
         if: ${{ steps.author_check.outputs.user_type == 'The user is a human.' }}
         run: |
           git diff ${{ github.event.pull_request.base.sha }} ${{ steps.get_sha.outputs.commit_sha }} -- tsc.json > changes.diff
           cat changes.diff
-
       - name: Block PR if name or repos changed
         if: ${{ steps.author_check.outputs.user_type == 'The user is a human.' }}
         run: |
@@ -76,7 +74,6 @@ jobs:
           else
             echo "No changes in 'name' or 'repos' detected"
           fi
-
       - name: Approve PR if slack, linkedin, or twitter changed
         if: ${{ steps.author_check.outputs.user_type == 'The user is a human.' }}
         run: |
