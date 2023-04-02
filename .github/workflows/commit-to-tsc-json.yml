@@ -36,9 +36,9 @@ jobs:
         id: set-is-human
         run: |
           if [ ${{ steps.check-user-type.outcome }} == "failure" ]; then
-            echo "::set-output name=is_human::true"
+            echo "is_human=true" >> $GITHUB_ENV
           else
-            echo "::set-output name=is_human::false"
+            echo "is_human=false" >> $GITHUB_ENV
           fi
 
       - name: Get changes in tsc.json
@@ -47,7 +47,7 @@ jobs:
           git diff origin/main tsc.json > changes.diff
 
       - name: Ensure only allowed changes if the user is a human
-        if: ${{ steps.set-is-human.outputs.is_human == 'true' }}
+        if: ${{ env.is_human == 'true' }}
         run: |
           ALLOWED_CHANGES="twitter\|slack\|linkedin\|availableForHire"
           if grep -q -v -E "^[\+\-]( {4}$ALLOWED_CHANGES:)" changes.diff; then
