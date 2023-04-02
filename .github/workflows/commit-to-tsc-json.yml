@@ -36,9 +36,9 @@ jobs:
         id: get_sha
         run: |
           if [ "${{ github.event_name }}" == "push" ]; then
-            echo "${{ github.sha }}" >> $GITHUB_STATE/commit_sha
+            echo "${{ github.sha }}" >> $GITHUB_STATE/commit_sha/commit_sha.txt
           else
-            echo "${{ github.event.pull_request.head.sha }}" >> $GITHUB_STATE/commit_sha
+            echo "${{ github.event.pull_request.head.sha }}" >> $GITHUB_STATE/commit_sha/commit_sha.txt
           fi
 
       - name: Run script
