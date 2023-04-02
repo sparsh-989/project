@@ -21,6 +21,8 @@ async function getPullRequestChanges() {
   }
 }
 
-module.exports = {
-  getPullRequestChanges,
-};
+getPullRequestChanges().then((data) => {
+  console.log(JSON.stringify(data));
+  console.log(`::set-output name=pr_changes::${JSON.stringify(data.files)}`);
+  console.log(`::set-output name=pull_request_number::${data.pullRequestNumber}`);
+});
