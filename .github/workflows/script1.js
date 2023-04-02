@@ -42,13 +42,8 @@ const fs = require('fs');
 
             for (const key in { ...oldEntry, ...newEntry }) {
               const isAllowedChange = allowedChangesByHuman.includes(key);
-              const isNewAddition = !oldEntry[key];
-              const isDeletion = !newEntry[key];
 
-              if (
-                (!isNewAddition && !isDeletion && oldEntry[key] !== newEntry[key] && !isAllowedChange) ||
-                (isDeletion && isAllowedChange)
-              ) {
+              if (oldEntry[key] !== newEntry[key] && !isAllowedChange) {
                 allowedChanges = false;
                 break outerLoop;
               }
