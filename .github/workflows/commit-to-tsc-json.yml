@@ -38,4 +38,3 @@ jobs:
           COMMIT_ID: ${{ github.sha }}
           USER_TYPE: ${{ steps.script_js.outputs.user_type }}
         run: node .github/workflows/script1.js $COMMIT_ID $USER_TYPE
-     
