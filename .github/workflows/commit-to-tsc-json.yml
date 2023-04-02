@@ -22,7 +22,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run script
+      - name: Run script.js
         env:
           COMMIT_ID: ${{ github.sha }}
         run: node .github/workflows/script.js $COMMIT_ID
+
+      - name: Run script1.js
+        env:
+          COMMIT_ID: ${{ github.sha }}
+        run: node .github/workflows/script1.js $COMMIT_ID
