@@ -27,7 +27,8 @@ jobs:
         env:
           COMMIT_ID: ${{ github.sha }}
         run: |
-          diff=$(git diff --no-color HEAD~ HEAD -- tsc.json)
+          parent_commit=$(git rev-list -n 1 HEAD~)
+          diff=$(git diff --no-color $parent_commit HEAD -- tsc.json)
           echo "::set-output name=diff::$diff"
           node .github/workflows/script.js $COMMIT_ID
 
