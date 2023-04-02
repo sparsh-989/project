@@ -22,21 +22,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Get parent commit
-        id: get-parent-commit
-        run: echo "::set-output name=parent-commit::$(git rev-list -n 1 HEAD~ || echo '')"
-
       - name: Get commit data and display Git diff
         id: commit-data
         env:
           COMMIT_ID: ${{ github.sha }}
-          PARENT_COMMIT: ${{ steps.get-parent-commit.outputs.parent-commit }}
         run: |
-          if [[ -z "$PARENT_COMMIT" ]]; then
-            diff=$(git diff --no-color /dev/null HEAD -- tsc.json)
-          else
-            diff=$(git diff --no-color $PARENT_COMMIT HEAD -- tsc.json)
-          fi
+          PARENT_COMMIT=$(git rev-list -n 1 HEAD~ || echo /dev/null)
+          diff=$(git diff --no-color $PARENT_COMMIT HEAD -- tsc.json)
           echo "::set-output name=diff::$diff"
           node .github/workflows/script.js $COMMIT_ID
 
