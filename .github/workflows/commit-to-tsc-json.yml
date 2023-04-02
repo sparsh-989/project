@@ -29,15 +29,15 @@ jobs:
         run: npm ci
 
       - name: Run script.js to check user type
+        id: check-user-type
         run: node .github/workflows/script.js ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Get changes in tsc.json
         run: |
           git fetch origin main
           git diff origin/main tsc.json > changes.diff
-
       - name: Ensure only allowed changes if the user is a human
-        if: ${{ steps.check-user-type.outputs.exitCode == 1 }}
+        if: ${{ steps.check-user-type.outcome == 'failure' }}
         run: |
           ALLOWED_CHANGES="twitter\|slack\|linkedin\|availableForHire"
           if grep -q -v -E "^[\+\-]( {4}$ALLOWED_CHANGES:)" changes.diff; then
