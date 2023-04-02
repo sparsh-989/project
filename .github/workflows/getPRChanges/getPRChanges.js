@@ -12,7 +12,10 @@ async function getPullRequestChanges() {
       pull_number: process.env.PULL_REQUEST_NUMBER,
     });
 
-    return response.data;
+    return {
+      pullRequestNumber: process.env.PULL_REQUEST_NUMBER,
+      files: response.data,
+    };
   } catch (error) {
     console.error("Error fetching pull request changes:", error.message);
   }
@@ -21,4 +24,3 @@ async function getPullRequestChanges() {
 module.exports = {
   getPullRequestChanges,
 };
-getPullRequestChanges().then((data) => console.log(JSON.stringify(data)));
