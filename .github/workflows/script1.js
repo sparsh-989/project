@@ -1,45 +1,47 @@
-const { exec } = require('child_process');
+const { exec } = require("child_process");
+const fs = require("fs");
 
 (async () => {
   try {
     const commitId = process.argv[2];
     const userType = process.argv[3];
-    const allowedChangesByHuman = ['linkedin', 'slack', 'twitter', 'availableForHire'];
 
-    exec(`git diff ${commitId}^ ${commitId} -- tsc.json`, (error, stdout, stderr) => {
+    // Read the old tsc.json file
+    const oldTscJson = JSON.parse(fs.readFileSync("tsc.json"));
+
+    // Checkout the latest version of tsc.json
+    exec(`git checkout ${commitId} -- tsc.json`, (error) => {
       if (error) {
         console.error(`Error: ${error.message}`);
         return;
       }
 
-      if (stderr) {
-        console.error(`Error: ${stderr}`);
-        return;
-      }
+      // Read the new tsc.json file
+      const newTscJson = JSON.parse(fs.readFileSync("tsc.json"));
 
-      const diffLines = stdout.split('\n');
+      const allowedChangesByHuman = ["linkedin", "slack", "twitter", "availableForHire"];
+
       let allowedChanges = true;
 
-      for (const line of diffLines) {
-        if (line.startsWith('+') || line.startsWith('-')) {
-          const match = line.match(/"([^"]+)":/);
-          if (match && match[1] && !allowedChangesByHuman.includes(match[1])) {
+      outerLoop: for (let i = 0; i < oldTscJson.length; i++) {
+        for (const key in oldTscJson[i]) {
+          if (oldTscJson[i][key] !== newTscJson[i][key] && !allowedChangesByHuman.includes(key)) {
             allowedChanges = false;
-            break;
+            break outerLoop;
           }
         }
       }
 
-      if (allowedChanges && userType === 'human') {
-        console.log('Valid changes.');
-      } else if (!allowedChanges && userType === 'bot') {
-        console.log('Valid changes.');
+      if (allowedChanges && userType === "human") {
+        console.log("Valid changes.");
+      } else if (!allowedChanges && userType === "bot") {
+        console.log("Valid changes.");
       } else {
-        console.log('Invalid changes.');
+        console.log("Invalid changes.");
       }
     });
   } catch (error) {
-    console.error('Error:', error.message);
+    console.error("Error:", error.message);
     process.exit(1);
   }
 })();
