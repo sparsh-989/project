@@ -25,4 +25,7 @@ jobs:
       - name: Run script
         env:
           COMMIT_ID: ${{ github.sha }}
-        run: node .github/workflows/script.js $COMMIT_ID
+        run: |
+          node .github/workflows/script.js $COMMIT_ID
+          echo "\nGit diff:"
+          git diff
