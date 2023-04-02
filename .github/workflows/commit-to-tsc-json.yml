@@ -39,4 +39,7 @@ jobs:
 
       - name: Display Git diff
         if: steps.commit-data.outputs.diff != ''
-        run: echo "Git diff:${steps.commit-data.outputs.diff}"
+        run: |
+         echo "Git diff:"
+         echo "${{ steps.commit-data.outputs.diff }}"
+
