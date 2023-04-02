@@ -7,6 +7,9 @@ on:
     paths:
       - 'tsc.json'
 
+env:
+  NODE_VERSION: 16
+
 jobs:
   check-author:
     runs-on: ubuntu-latest
@@ -17,29 +20,25 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: 16
-      - name: Install dependencies
-        run: npm ci
+          node-version: ${{ env.NODE_VERSION }}
 
+      - name: Get parent commit
+        id: parent-commit
+        run: echo "::set-env name=PARENT_COMMIT::$(git rev-parse HEAD~)"
 
-      - name: Get previous file version
-        run: |
-          git show HEAD:tsc.json > prev-tsc.json
-          echo "::set-output name=prev-file-path::prev-tsc.json"
+      - name: Get previous version of tsc.json
+        run: git show ${{ env.PARENT_COMMIT }}:tsc.json > prev-tsc.json
+        shell: /usr/bin/bash -e {0}
 
       - name: Get commit data and display Git diff
         id: commit-data
         env:
           COMMIT_ID: ${{ github.sha }}
-          PREV_FILE: ${{ steps.get-prev-file.outputs.prev-file-path }}
         run: |
-          diff=$(git diff --no-color $PREV_FILE tsc.json)
-          echo "::set-output name=diff::$diff"
+          diff=$(git diff --no-color prev-tsc.json tsc.json)
+          echo "::set-env name=DIFF::$diff"
           node .github/workflows/script.js $COMMIT_ID
 
       - name: Display Git diff
-        if: steps.commit-data.outputs.diff != ''
-        run: |
-         echo "Git diff:"
-         echo "${{ steps.commit-data.outputs.diff }}"
-
+        if: env.DIFF != ''
+        run: echo "Git diff:${{ env.DIFF }}"
