@@ -36,11 +36,11 @@ const fs = require('fs');
 
           let allowedChanges = true;
 
-          for (let i = 0; i < oldTscJson.length; i++) {
+          outerLoop: for (let i = 0; i < oldTscJson.length; i++) {
             for (const key in oldTscJson[i]) {
               if (oldTscJson[i][key] !== newTscJson[i][key] && !allowedChangesByHuman.includes(key)) {
                 allowedChanges = false;
-                break;
+                break outerLoop;
               }
             }
           }
@@ -58,4 +58,3 @@ const fs = require('fs');
     process.exit(1);
   }
 })();
-
