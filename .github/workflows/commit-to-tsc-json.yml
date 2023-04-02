@@ -39,9 +39,9 @@ jobs:
           USER_TYPE: ${{ steps.script_js.outputs.user_type }}
         run: node .github/workflows/script1.js $COMMIT_ID $USER_TYPE
       - name: Block PR if changes are invalid
-        if: $USER_TYPE != "Bot" && $VALID_CHANGES == "false"
+      
         run: |
-            
+            if [ "$USER_TYPE" != "Bot" ] && [ "$VALID_CHANGES" == "false" ]; then
             curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             -H "Accept: application/vnd.github.antiope-preview+json" \
             "https://api.github.com/repos/$GITHUB_REPOSITORY/check-runs" \
