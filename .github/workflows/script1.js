@@ -36,11 +36,18 @@ const fs = require('fs');
 
           let allowedChanges = true;
 
-          outerLoop: for (let i = 0; i < newTscJson.length; i++) {
-            for (const key in newTscJson[i]) {
+          outerLoop: for (let i = 0; i < Math.max(oldTscJson.length, newTscJson.length); i++) {
+            const oldEntry = oldTscJson[i] || {};
+            const newEntry = newTscJson[i] || {};
+
+            for (const key in { ...oldEntry, ...newEntry }) {
+              const isAllowedChange = allowedChangesByHuman.includes(key);
+              const isNewAddition = !oldEntry[key];
+              const isDeletion = !newEntry[key];
+
               if (
-                (!oldTscJson[i] || oldTscJson[i][key] !== newTscJson[i][key]) &&
-                !allowedChangesByHuman.includes(key)
+                (!isNewAddition && !isDeletion && oldEntry[key] !== newEntry[key] && !isAllowedChange) ||
+                (isDeletion && isAllowedChange)
               ) {
                 allowedChanges = false;
                 break outerLoop;
