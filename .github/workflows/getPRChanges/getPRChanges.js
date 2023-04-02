@@ -1,9 +1,9 @@
-
+const fs = require('fs');
 const { Octokit } = require("@octokit/rest");
 
 const octokit = new Octokit({
-  auth: "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",
-});
+    auth: "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",
+  });
 
 async function getPullRequestChanges() {
   try {
@@ -24,6 +24,7 @@ async function getPullRequestChanges() {
 
 getPullRequestChanges().then((data) => {
   console.log(JSON.stringify(data));
-  console.log(`::set-env name=PR_CHANGES::${JSON.stringify(data.files)}`);
-  console.log(`::set-env name=PULL_REQUEST_NUMBER::${data.pullRequestNumber}`);
+  fs.writeFileSync('pr_changes.json', JSON.stringify(data.files));
+  fs.writeFileSync('pull_request_number.txt', data.pullRequestNumber.toString());
 });
+
