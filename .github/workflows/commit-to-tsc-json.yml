@@ -1,4 +1,4 @@
-name: Check Commit Author
+name: Check Commit Author and Display Diff
 
 on:
   push:
@@ -22,10 +22,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run script
+      - name: Get commit data and display Git diff
+        id: commit-data
         env:
           COMMIT_ID: ${{ github.sha }}
         run: |
+          diff=$(git diff --no-color HEAD~ HEAD -- tsc.json)
+          echo "::set-output name=diff::$diff"
           node .github/workflows/script.js $COMMIT_ID
-          echo "\nGit diff:"
-          git diff
+
+      - name: Display Git diff
+        if: steps.commit-data.outputs.diff != ''
+        run: echo "Git diff: ${steps.commit-data.outputs.diff}"
