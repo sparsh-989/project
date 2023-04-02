@@ -12,7 +12,10 @@ async function getPullRequestChanges() {
       repo: "project",
       pull_number: process.env.PULL_REQUEST_NUMBER,
     });
-
+     if (!response.data) {
+      console.error("Error fetching pull request changes: Response data is undefined");
+      return;
+    }
     return {
       pullRequestNumber: process.env.PULL_REQUEST_NUMBER,
       files: response.data,
