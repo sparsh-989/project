@@ -19,26 +19,21 @@ jobs:
         with:
           node-version: 16
 
-      - name: Get parent commit
-        id: parent-commit
-        run: echo "::set-output name=parent-commit::$(git rev-parse HEAD~)"
+      - name: Get previous version of tsc.json
+        id: get-prev-version
+        run: |
+          git show HEAD^:tsc.json > prev-tsc.json
+          echo "::set-output name=prev-file-path::prev-tsc.json"
 
       - name: Get commit data and display Git diff
         id: commit-data
         env:
           COMMIT_ID: ${{ github.sha }}
-          PARENT_COMMIT: ${{ steps.parent-commit.outputs.parent-commit }}
         run: |
-          if [[ -z "$PARENT_COMMIT" ]]; then
-            diff=$(git diff --no-color /dev/null HEAD -- tsc.json)
-          else
-            diff=$(git diff --no-color $PARENT_COMMIT HEAD -- tsc.json)
-          fi
+          diff=$(git diff --no-color $(cat ${{ steps.get-prev-version.outputs.prev-file-path }}) tsc.json)
           echo "::set-output name=diff::$diff"
           node .github/workflows/script.js $COMMIT_ID
 
       - name: Display Git diff
         if: steps.commit-data.outputs.diff != ''
-        run: |
-         echo "Git diff:"
-         echo "${{ steps.commit-data.outputs.diff }}"
+        run: echo "Git diff:${steps.commit-data.outputs.diff}"
