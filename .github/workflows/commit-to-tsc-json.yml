@@ -1,4 +1,4 @@
-name: Check Commit Author and Display Diff
+name: Check Commit Author
 
 on:
   push:
@@ -14,32 +14,13 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v2
 
-      - name: Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '16.x'
+          node-version: 16
 
       - name: Install dependencies
-        run: npm install
-
-      - name: Get parent commit
-        id: parent-commit
-        run: echo "::set-output name=parent-commit::$(git rev-parse HEAD~)"
-
-      - name: Get diff between current and previous version of tsc.json
-        id: diff-tsc-json
-        env:
-          PARENT_COMMIT: ${{ steps.parent-commit.outputs.parent-commit }}
-        run: |
-          if [[ -n "${PARENT_COMMIT}" ]]; then
-            git show ${PARENT_COMMIT}:tsc.json > prev-tsc.json
-            git diff --no-color prev-tsc.json tsc.json > diff.txt || true
-          fi
-          echo "::set-output name=diff-path::diff.txt"
-
-      - name: Display Git diff
-        if: steps.diff-tsc-json.outputs.diff-path != ''
-        run: cat "${{ steps.diff-tsc-json.outputs.diff-path }}"
+        run: npm ci
 
       - name: Run script
         env:
