@@ -6,7 +6,9 @@ const fs = require("fs");
     const commitId = process.argv[2];
     const userType = process.argv[3];
 
-    // Get the tsc.json content from the specified commit
+    const allowedChangesByHuman = ["twitter", "slack", "linkedin", "availableForHire"];
+    const allowedChangesByBot = ["name", "repos", "github"];
+
     exec(`git show ${commitId}:tsc.json`, async (error, oldTscJsonContent) => {
       if (error) {
         console.error(`Error: ${error.message}`);
@@ -14,8 +16,6 @@ const fs = require("fs");
       }
 
       const oldTscJson = JSON.parse(oldTscJsonContent);
-
-      // Read the new tsc.json file (current working copy)
       const newTscJson = JSON.parse(fs.readFileSync("tsc.json"));
 
       let allowedChanges = true;
@@ -25,8 +25,6 @@ const fs = require("fs");
       for (const key of keys) {
         if (oldTscJson[key] !== newTscJson[key]) {
           console.log(`Change detected in '${key}'`);
-          console.log(`Old value: ${JSON.stringify(oldTscJson[key])}`);
-          console.log(`New value: ${JSON.stringify(newTscJson[key])}`);
 
           if (key === "repos") {
             const oldReposSet = new Set(oldTscJson[key]);
@@ -39,16 +37,12 @@ const fs = require("fs");
               allowedChanges = false;
               break;
             }
-          } else if (key === "linkedin" || key === "twitter" || key === "slack" || key === "availableForHire") {
-            if (userType !== "human") {
-              allowedChanges = false;
-              break;
-            }
-          } else if (key === "name" || key === "github") {
-            if (userType !== "bot") {
-              allowedChanges = false;
-              break;
-            }
+          } else if (userType === "human" && !allowedChangesByHuman.includes(key)) {
+            allowedChanges = false;
+            break;
+          } else if (userType === "bot" && !allowedChangesByBot.includes(key)) {
+            allowedChanges = false;
+            break;
           }
         }
       }
