@@ -47,6 +47,7 @@ const fs = require("fs");
             }
           }
         } else if (oldTscJson[key] !== newTscJson[key]) {
+           console.log("Valid x.");
           if (userType === "human" && disallowedChangesByHuman.includes(key)) {
             allowedChanges = false;
             console.log("Valid c.");
