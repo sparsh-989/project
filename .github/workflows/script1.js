@@ -6,10 +6,8 @@ const fs = require("fs");
     const commitId = process.argv[2];
     const userType = process.argv[3];
 
-    const allowedChangesByHuman = ["linkedin", "slack", "twitter", "availableForHire", "repos"];
-    const disallowedChangesByHuman = ["name", "github"];
+    const allowedChangesByHuman = ["twitter", "slack", "linkedin", "availableForHire"];
     const allowedChangesByBot = ["name", "repos", "github"];
-    const disallowedChangesByBot = ["linkedin", "slack", "twitter", "availableForHire"];
 
     // Get the tsc.json content from the specified commit
     exec(`git show ${commitId}:tsc.json`, async (error, oldTscJsonContent) => {
@@ -35,26 +33,19 @@ const fs = require("fs");
           const hasReposChanges = [...oldReposSet].some(repo => !newReposSet.has(repo))
             || [...newReposSet].some(repo => !oldReposSet.has(repo));
 
-          if (hasReposChanges) {
-            if (userType === "human" && disallowedChangesByHuman.includes(key)) {
-              allowedChanges = false;
-              console.log("Valid a.");
-              break;
-            } else if (userType === "bot" && disallowedChangesByBot.includes(key)) {
-              allowedChanges = false;
-              console.log("Valid b.");
-              break;
-            }
+          if (hasReposChanges && userType !== "bot") {
+            allowedChanges = false;
+            break;
           }
         } else if (oldTscJson[key] !== newTscJson[key]) {
-           console.log("Valid x.");
-          if (userType === "human" && disallowedChangesByHuman.includes(key)) {
+          console.log("no change to repo");
+          if (userType === "human" && !allowedChangesByHuman.includes(key)) {
+            console.log("a");
             allowedChanges = false;
-            console.log("Valid c.");
             break;
-          } else if (userType === "bot" && disallowedChangesByBot.includes(key)) {
+          } else if (userType === "bot" && !allowedChangesByBot.includes(key)) {
+            console.log("b");
             allowedChanges = false;
-            console.log("Valid d.");
             break;
           }
         }
@@ -71,4 +62,3 @@ const fs = require("fs");
     process.exit(1);
   }
 })();
-
