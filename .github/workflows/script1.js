@@ -6,9 +6,6 @@ const fs = require("fs");
     const commitId = process.argv[2];
     const userType = process.argv[3];
 
-    const allowedChangesByHuman = ["twitter", "slack", "linkedin", "availableForHire"];
-    const allowedChangesByBot = ["name", "repos", "github"];
-
     // Get the tsc.json content from the specified commit
     exec(`git show ${commitId}:tsc.json`, async (error, oldTscJsonContent) => {
       if (error) {
@@ -42,11 +39,13 @@ const fs = require("fs");
               allowedChanges = false;
               break;
             }
-          } else {
-            if (userType === "human" && !allowedChangesByHuman.includes(key)) {
+          } else if (key === "linkedin" || key === "twitter" || key === "slack" || key === "availableForHire") {
+            if (userType !== "human") {
               allowedChanges = false;
               break;
-            } else if (userType === "bot" && !allowedChangesByBot.includes(key)) {
+            }
+          } else if (key === "name" || key === "github") {
+            if (userType !== "bot") {
               allowedChanges = false;
               break;
             }
