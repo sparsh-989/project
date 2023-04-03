@@ -36,20 +36,24 @@ const fs = require("fs");
             || [...newReposSet].some(repo => !oldReposSet.has(repo));
 
           if (hasReposChanges) {
-            if (userType === "human" && !allowedChangesByHuman.includes(key)) {
+            if (userType === "human" && disallowedChangesByHuman.includes(key)) {
               allowedChanges = false;
+              console.log("Valid a.");
               break;
-            } else if (userType === "bot" && !allowedChangesByBot.includes(key)) {
+            } else if (userType === "bot" && disallowedChangesByBot.includes(key)) {
               allowedChanges = false;
+              console.log("Valid b.");
               break;
             }
           }
         } else if (oldTscJson[key] !== newTscJson[key]) {
           if (userType === "human" && disallowedChangesByHuman.includes(key)) {
             allowedChanges = false;
+            console.log("Valid c.");
             break;
           } else if (userType === "bot" && disallowedChangesByBot.includes(key)) {
             allowedChanges = false;
+            console.log("Valid d.");
             break;
           }
         }
@@ -66,3 +70,4 @@ const fs = require("fs");
     process.exit(1);
   }
 })();
+
