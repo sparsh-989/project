@@ -42,6 +42,8 @@ const fs = require("fs");
           }
         } else if (oldTscJson[key] !== newTscJson[key]) {
           console.log(`Change detected in '${key}'`);
+          console.log(`Object name: ${JSON.stringify(newTscJson[key])}`); // Added log statement
+
           if (userType === "human" && !allowedChangesByHuman.includes(key)) {
             allowedChanges = false;
             break;
