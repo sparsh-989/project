@@ -33,18 +33,19 @@ const fs = require("fs");
           const hasReposChanges = [...oldReposSet].some(repo => !newReposSet.has(repo))
             || [...newReposSet].some(repo => !oldReposSet.has(repo));
 
-          if (hasReposChanges && userType !== "bot") {
-            allowedChanges = false;
-            break;
+          if (hasReposChanges) {
+            console.log(`Change detected in '${key}'`);
+            if (userType !== "bot") {
+              allowedChanges = false;
+              break;
+            }
           }
         } else if (oldTscJson[key] !== newTscJson[key]) {
-          console.log("no change to repo");
+          console.log(`Change detected in '${key}'`);
           if (userType === "human" && !allowedChangesByHuman.includes(key)) {
-            console.log("a");
             allowedChanges = false;
             break;
           } else if (userType === "bot" && !allowedChangesByBot.includes(key)) {
-            console.log("b");
             allowedChanges = false;
             break;
           }
