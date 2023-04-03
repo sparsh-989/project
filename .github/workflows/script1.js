@@ -23,14 +23,18 @@ const fs = require("fs");
 
       let allowedChanges = true;
 
-      outerLoop: for (let i = 0; i < oldTscJson.length; i++) {
-        for (const key in oldTscJson[i]) {
-          if (oldTscJson[i][key] !== newTscJson[i][key] && !allowedChangesByHuman.includes(key)) {
-            allowedChanges = false;
-            break outerLoop;
-          }
-        }
-      }
+      outerLoop: for (let i = 0; i < newTscJson.length; i++) {
+      for (const key in newTscJson[i]) {
+    if (
+      (!oldTscJson[i].hasOwnProperty(key) && !allowedChangesByHuman.includes(key)) ||
+      (oldTscJson[i][key] !== newTscJson[i][key] && !allowedChangesByHuman.includes(key))
+    ) {
+      allowedChanges = false;
+      break outerLoop;
+    }
+  }
+}
+
 
       if (allowedChanges && userType === "human") {
         console.log("Valid changes.");
