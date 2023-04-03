@@ -26,30 +26,30 @@ const fs = require("fs");
       const keys = new Set([...Object.keys(oldTscJson), ...Object.keys(newTscJson)]);
 
       for (const key of keys) {
-        if (key === "repos") {
-          const oldReposSet = new Set(oldTscJson[key]);
-          const newReposSet = new Set(newTscJson[key]);
+        if (oldTscJson[key] !== newTscJson[key]) {
+          console.log(`Change detected in '${key}'`);
+          console.log(`Old value: ${JSON.stringify(oldTscJson[key])}`);
+          console.log(`New value: ${JSON.stringify(newTscJson[key])}`);
 
-          const hasReposChanges = [...oldReposSet].some(repo => !newReposSet.has(repo))
-            || [...newReposSet].some(repo => !oldReposSet.has(repo));
+          if (key === "repos") {
+            const oldReposSet = new Set(oldTscJson[key]);
+            const newReposSet = new Set(newTscJson[key]);
 
-          if (hasReposChanges) {
-            console.log(`Change detected in '${key}'`);
-            if (userType !== "bot") {
+            const hasReposChanges = [...oldReposSet].some(repo => !newReposSet.has(repo))
+              || [...newReposSet].some(repo => !oldReposSet.has(repo));
+
+            if (hasReposChanges && userType !== "bot") {
               allowedChanges = false;
               break;
             }
-          }
-        } else if (oldTscJson[key] !== newTscJson[key]) {
-          console.log(`Change detected in '${key}'`);
-          console.log(`Object name: ${JSON.stringify(newTscJson[key])}`); // Added log statement
-
-          if (userType === "human" && !allowedChangesByHuman.includes(key)) {
-            allowedChanges = false;
-            break;
-          } else if (userType === "bot" && !allowedChangesByBot.includes(key)) {
-            allowedChanges = false;
-            break;
+          } else {
+            if (userType === "human" && !allowedChangesByHuman.includes(key)) {
+              allowedChanges = false;
+              break;
+            } else if (userType === "bot" && !allowedChangesByBot.includes(key)) {
+              allowedChanges = false;
+              break;
+            }
           }
         }
       }
