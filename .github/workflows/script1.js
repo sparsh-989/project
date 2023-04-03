@@ -33,20 +33,19 @@ const fs = require("fs");
         const gitDiffOutput = stdout;
 
         let allowedChanges = true;
+        const lines = gitDiffOutput.split('\n');
 
-        // Iterate through the diff output and check if the changes are allowed
-        const regex = /^[-+]\s+"([^"]+)":/gm;
-        let match;
+        for (const line of lines) {
+          if (line.startsWith('+') && line.includes(':')) {
+            const key = line.split(':')[0].trim().slice(2, -1);
 
-        while ((match = regex.exec(gitDiffOutput)) !== null) {
-          const key = match[1];
-
-          if (userType === "human" && !allowedChangesByHuman.includes(key)) {
-            allowedChanges = false;
-            break;
-          } else if (userType === "bot" && !allowedChangesByBot.includes(key)) {
-            allowedChanges = false;
-            break;
+            if (userType === "human" && !allowedChangesByHuman.includes(key)) {
+              allowedChanges = false;
+              break;
+            } else if (userType === "bot" && !allowedChangesByBot.includes(key)) {
+              allowedChanges = false;
+              break;
+            }
           }
         }
 
