@@ -1,6 +1,34 @@
 const { exec } = require("child_process");
 const fs = require("fs");
 
+function isEqual(obj1, obj2) {
+  const keys1 = Object.keys(obj1);
+  const keys2 = Object.keys(obj2);
+
+  if (keys1.length !== keys2.length) {
+    return false;
+  }
+
+  for (const key of keys1) {
+    const val1 = obj1[key];
+    const val2 = obj2[key];
+    const areObjects = isObject(val1) && isObject(val2);
+
+    if (
+      (areObjects && !isEqual(val1, val2)) ||
+      (!areObjects && val1 !== val2)
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function isObject(obj) {
+  return obj != null && typeof obj === 'object';
+}
+
 (async () => {
   try {
     const commitId = process.argv[2];
@@ -23,18 +51,26 @@ const fs = require("fs");
 
       let allowedChanges = true;
 
-      outerLoop: for (let i = 0; i < newTscJson.length; i++) {
-      for (const key in newTscJson[i]) {
-    if (
-      (!oldTscJson[i].hasOwnProperty(key) && !allowedChangesByHuman.includes(key)) ||
-      (oldTscJson[i][key] !== newTscJson[i][key] && !allowedChangesByHuman.includes(key))
-    ) {
-      allowedChanges = false;
-      break outerLoop;
-    }
-  }
-}
+      outerLoop: for (let i = 0; i < oldTscJson.length; i++) {
+        const oldObj = oldTscJson[i];
+        const newObj = newTscJson[i];
+        const oldKeys = Object.keys(oldObj);
 
+        for (const key of oldKeys) {
+          if (!allowedChangesByHuman.includes(key)) {
+            const tempOldObj = { ...oldObj };
+            const tempNewObj = { ...newObj };
+
+            delete tempOldObj[key];
+            delete tempNewObj[key];
+
+            if (!isEqual(tempOldObj, tempNewObj)) {
+              allowedChanges = false;
+              break outerLoop;
+            }
+          }
+        }
+      }
 
       if (allowedChanges && userType === "human") {
         console.log("Valid changes.");
