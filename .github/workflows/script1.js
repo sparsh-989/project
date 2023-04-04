@@ -55,6 +55,7 @@ const { exec } = require("child_process");
         console.log("Valid changes.");
       } else {
         console.log("Invalid changes.");
+        process.exit(1); 
       }
     });
   } catch (error) {
