@@ -1,47 +1,48 @@
 const { exec } = require("child_process");
 
-const allowedChangesByHuman = ["twitter", "slack", "linkedin", "availableForHire"];
-const allowedChangesByBot = ["name", "repos", "github"];
-
 (async () => {
   try {
     const commitId = process.argv[2];
     const userType = process.argv[3];
 
-    exec(`git diff ${commitId} ${commitId}^ -- tsc.json`, async (error, stdout) => {
+    const allowedChangesByHuman = ["twitter", "slack", "linkedin", "availableForHire"];
+    const allowedChangesByBot = ["name", "repos", "github"];
+
+    exec(`git diff ${commitId}^! --word-diff`, async (error, gitDiffOutput) => {
       if (error) {
         console.error(`Error: ${error.message}`);
         return;
       }
 
-      const changes = stdout.toString();
+      const lines = gitDiffOutput.split("\n");
+
+      const changes = new Set();
       let allowedChanges = true;
 
-      // Parse the diff and check which properties have changed
-      changes.split("\n").forEach(line => {
-        if (line.startsWith("+++") || line.startsWith("---")) {
-          return; // Ignore header lines
-        }
+      for (const line of lines) {
+        if (line.startsWith("[-") || line.startsWith("{+")) {
+          const key = line.split(/[\[\{\]\}]/).find(word => word.includes('":'));
+          if (key) {
+            const fieldName = key.slice(0, -2);
 
-        if (line.startsWith("+") || line.startsWith("-")) {
-          const [key, value] = line.substring(1).split(":").map(str => str.trim());
+            if (!changes.has(fieldName)) {
+              console.log(`Change detected in '${fieldName}'`);
+              changes.add(fieldName);
 
-          if (line.startsWith("+")) {
-            console.log(`Change detected in '${key}'`);
-
-            if (userType === "human" && !allowedChangesByHuman.includes(key)) {
-              allowedChanges = false;
-            } else if (userType === "bot" && !allowedChangesByBot.includes(key)) {
-              allowedChanges = false;
+              if (fieldName === "repos" && userType !== "bot") {
+                allowedChanges = false;
+                break;
+              } else if (userType === "human" && !allowedChangesByHuman.includes(fieldName)) {
+                allowedChanges = false;
+                break;
+              } else if (userType === "bot" && !allowedChangesByBot.includes(fieldName)) {
+                allowedChanges = false;
+                break;
+              }
             }
           }
-
-          if (!allowedChanges) {
-            console.log(`Invalid change detected: ${line}`);
-            return;
-          }
         }
-      });
+      }
 
       if (allowedChanges) {
         console.log("Valid changes.");
