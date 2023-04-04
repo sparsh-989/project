@@ -53,6 +53,6 @@ jobs:
             -H "Authorization: token $GITHUB_TOKEN" \
             https://api.github.com/repos/${{ github.repository }}/pulls/$pr_number/requested_reviewers \
             -d '{
-              "reviewers": ["REVIEWER_USERNAME"]
+              "reviewers": ["adityaofficial10"]
             }'
 
