@@ -8,32 +8,34 @@ const { exec } = require("child_process");
     const allowedChangesByHuman = ["twitter", "slack", "linkedin", "availableForHire"];
     const allowedChangesByBot = ["name", "repos", "github"];
 
-    exec(`git diff ${commitId}^! --word-diff`, async (error, gitDiffOutput) => {
+    exec(`git diff ${commitId}^!`, async (error, gitDiffOutput) => {
       if (error) {
         console.error(`Error: ${error.message}`);
         return;
       }
 
       const lines = gitDiffOutput.split("\n");
-
-      const changes = new Set();
-      let allowedChanges = true;
+      const fieldCounts = new Map();
 
       for (const line of lines) {
-        if (line.startsWith("[-") || line.startsWith("{+")) {
-          const fieldName = line.match(/"([^"]+)"/)?.[1];
+        const fieldName = line.match(/"([a-zA-Z]+)":/)?.[1];
+        if (fieldName) {
+          fieldCounts.set(fieldName, (fieldCounts.get(fieldName) || 0) + 1);
+        }
+      }
 
-          if (fieldName && !changes.has(fieldName)) {
-            console.log(`Change detected in '${fieldName}'`);
-            changes.add(fieldName);
+      let allowedChanges = true;
 
-            if (userType === "human" && !allowedChangesByHuman.includes(fieldName)) {
-              allowedChanges = false;
-              break;
-            } else if (userType === "bot" && !allowedChangesByBot.includes(fieldName)) {
-              allowedChanges = false;
-              break;
-            }
+      for (const [fieldName, count] of fieldCounts.entries()) {
+        if (count >= 2) {
+          console.log(`Change detected in '${fieldName}'`);
+
+          if (userType === "human" && !allowedChangesByHuman.includes(fieldName)) {
+            allowedChanges = false;
+            break;
+          } else if (userType === "bot" && !allowedChangesByBot.includes(fieldName)) {
+            allowedChanges = false;
+            break;
           }
         }
       }
