@@ -19,6 +19,10 @@ const allowedChangesByBot = ["name", "repos", "github"];
 
       // Parse the diff and check which properties have changed
       changes.split("\n").forEach(line => {
+        if (line.startsWith("+++") || line.startsWith("---")) {
+          return; // Ignore header lines
+        }
+
         if (line.startsWith("+") || line.startsWith("-")) {
           const [key, value] = line.substring(1).split(":").map(str => str.trim());
 
