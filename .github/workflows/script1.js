@@ -25,9 +25,11 @@ const { exec } = require("child_process");
       }
 
       let allowedChanges = true;
+      let changeDetected = false;
 
       for (const [fieldName, count] of fieldCounts.entries()) {
         if (count >= 2) {
+          changeDetected = true;
           console.log(`Change detected in '${fieldName}'`);
 
           if (userType === "human" && !allowedChangesByHuman.includes(fieldName)) {
@@ -37,6 +39,15 @@ const { exec } = require("child_process");
             allowedChanges = false;
             break;
           }
+        }
+      }
+
+      if (!changeDetected) {
+        console.log(`Change detected in 'repos'`);
+        if (userType === "human" && !allowedChangesByHuman.includes("repos")) {
+          allowedChanges = false;
+        } else if (userType === "bot" && !allowedChangesByBot.includes("repos")) {
+          allowedChanges = false;
         }
       }
 
