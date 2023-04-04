@@ -1,5 +1,4 @@
 const { exec } = require("child_process");
-const fs = require("fs");
 
 const allowedChangesByHuman = ["twitter", "slack", "linkedin", "availableForHire"];
 const allowedChangesByBot = ["name", "repos", "github"];
@@ -16,47 +15,29 @@ const allowedChangesByBot = ["name", "repos", "github"];
       }
 
       const changes = stdout.toString();
-      const oldTscJson = JSON.parse(fs.readFileSync("tsc.json"));
-      const newTscJson = JSON.parse(fs.readFileSync("tsc.json"));
+      let allowedChanges = true;
 
       // Parse the diff and check which properties have changed
       changes.split("\n").forEach(line => {
-        if (line.startsWith("+")) {
-          const [key, value] = line.substring(1).split(":");
-          newTscJson[key.trim()] = value.trim();
-        } else if (line.startsWith("-")) {
-          const [key, value] = line.substring(1).split(":");
-          oldTscJson[key.trim()] = value.trim();
-        }
-      });
+        if (line.startsWith("+") || line.startsWith("-")) {
+          const [key, value] = line.substring(1).split(":").map(str => str.trim());
 
-      let allowedChanges = true;
+          if (line.startsWith("+")) {
+            console.log(`Change detected in '${key}'`);
 
-      // Check which properties have changed and if they are allowed changes
-      for (const key of Object.keys(newTscJson)) {
-        if (oldTscJson[key] !== newTscJson[key]) {
-          console.log(`Change detected in '${key}'`);
-
-          if (key === "repos") {
-            const oldReposSet = new Set(oldTscJson[key]);
-            const newReposSet = new Set(newTscJson[key]);
-
-            const hasReposChanges = [...oldReposSet].some(repo => !newReposSet.has(repo))
-              || [...newReposSet].some(repo => !oldReposSet.has(repo));
-
-            if (hasReposChanges && userType !== "bot") {
+            if (userType === "human" && !allowedChangesByHuman.includes(key)) {
               allowedChanges = false;
-              break;
+            } else if (userType === "bot" && !allowedChangesByBot.includes(key)) {
+              allowedChanges = false;
             }
-          } else if (userType === "human" && !allowedChangesByHuman.includes(key)) {
-            allowedChanges = false;
-            break;
-          } else if (userType === "bot" && !allowedChangesByBot.includes(key)) {
-            allowedChanges = false;
-            break;
+          }
+
+          if (!allowedChanges) {
+            console.log(`Invalid change detected: ${line}`);
+            return;
           }
         }
-      }
+      });
 
       if (allowedChanges) {
         console.log("Valid changes.");
