@@ -1,28 +1,39 @@
 const { exec } = require("child_process");
 const fs = require("fs");
 
+const allowedChangesByHuman = ["twitter", "slack", "linkedin", "availableForHire"];
+const allowedChangesByBot = ["name", "repos", "github"];
+
 (async () => {
   try {
     const commitId = process.argv[2];
     const userType = process.argv[3];
 
-    const allowedChangesByHuman = ["twitter", "slack", "linkedin", "availableForHire"];
-    const allowedChangesByBot = ["name", "repos", "github"];
-
-    exec(`git show ${commitId}:tsc.json`, async (error, oldTscJsonContent) => {
+    exec(`git diff ${commitId} ${commitId}^ -- tsc.json`, async (error, stdout) => {
       if (error) {
         console.error(`Error: ${error.message}`);
         return;
       }
 
-      const oldTscJson = JSON.parse(oldTscJsonContent);
+      const changes = stdout.toString();
+      const oldTscJson = JSON.parse(fs.readFileSync("tsc.json"));
       const newTscJson = JSON.parse(fs.readFileSync("tsc.json"));
+
+      // Parse the diff and check which properties have changed
+      changes.split("\n").forEach(line => {
+        if (line.startsWith("+")) {
+          const [key, value] = line.substring(1).split(":");
+          newTscJson[key.trim()] = value.trim();
+        } else if (line.startsWith("-")) {
+          const [key, value] = line.substring(1).split(":");
+          oldTscJson[key.trim()] = value.trim();
+        }
+      });
 
       let allowedChanges = true;
 
-      const keys = new Set([...Object.keys(oldTscJson), ...Object.keys(newTscJson)]);
-
-      for (const key of keys) {
+      // Check which properties have changed and if they are allowed changes
+      for (const key of Object.keys(newTscJson)) {
         if (oldTscJson[key] !== newTscJson[key]) {
           console.log(`Change detected in '${key}'`);
 
