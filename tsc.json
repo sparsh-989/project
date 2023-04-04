@@ -205,7 +205,7 @@
       "spec-json-schemas",
       "template-for-generator-templates",
       "website",
-      "bundler"
+      "bundlersh"
     ]
   },
   {
