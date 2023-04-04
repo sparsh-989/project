@@ -21,24 +21,18 @@ const { exec } = require("child_process");
 
       for (const line of lines) {
         if (line.startsWith("[-") || line.startsWith("{+")) {
-          const key = line.split(/[\[\{\]\}]/).find(word => word.includes('":'));
-          if (key) {
-            const fieldName = key.slice(0, -2);
+          const fieldName = line.match(/"([^"]+)"/)?.[1];
 
-            if (!changes.has(fieldName)) {
-              console.log(`Change detected in '${fieldName}'`);
-              changes.add(fieldName);
+          if (fieldName && !changes.has(fieldName)) {
+            console.log(`Change detected in '${fieldName}'`);
+            changes.add(fieldName);
 
-              if (fieldName === "repos" && userType !== "bot") {
-                allowedChanges = false;
-                break;
-              } else if (userType === "human" && !allowedChangesByHuman.includes(fieldName)) {
-                allowedChanges = false;
-                break;
-              } else if (userType === "bot" && !allowedChangesByBot.includes(fieldName)) {
-                allowedChanges = false;
-                break;
-              }
+            if (userType === "human" && !allowedChangesByHuman.includes(fieldName)) {
+              allowedChanges = false;
+              break;
+            } else if (userType === "bot" && !allowedChangesByBot.includes(fieldName)) {
+              allowedChanges = false;
+              break;
             }
           }
         }
