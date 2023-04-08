@@ -1,0 +1,40 @@
+name: Check PR workflow
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  check-pr-workflow:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+    steps:
+      - name: Check if workflow succeeded
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const { data: runs } = await github.actions.listWorkflowRunsForRepo({
+              workflow_id: '<your_workflow_id>',
+              branch: 'main',
+              status: 'success'
+            })
+
+            const latestRun = runs[0]
+
+            if (!latestRun) {
+              throw new Error('No successful workflow runs found.')
+            }
+
+            const { data: jobs } = await github.actions.listJobsForWorkflowRun({
+              owner: '<your_owner>',
+              repo: '<your_repo>',
+              run_id: latestRun.id
+            })
+
+            const checkAuthorJob = jobs.find(job => job.name === 'check-author')
+
+            if (!checkAuthorJob || checkAuthorJob.conclusion !== 'success') {
+              throw new Error('Workflow check-author failed.')
+            }
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
