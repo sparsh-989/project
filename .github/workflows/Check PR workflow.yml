@@ -3,6 +3,8 @@ name: Check PR workflow
 on:
   pull_request:
     types: [closed]
+    branches :
+    - main
 
 jobs:
   check-pr-workflow:
