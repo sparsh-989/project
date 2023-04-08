@@ -26,8 +26,8 @@ jobs:
             }
 
             const { data: jobs } = await github.actions.listJobsForWorkflowRun({
-              owner: '<your_owner>',
-              repo: '<your_repo>',
+              owner: '<sparsh-989>',
+              repo: '<project>',
               run_id: latestRun.id
             })
 
