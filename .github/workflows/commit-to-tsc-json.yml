@@ -6,6 +6,12 @@ on:
       - main
     paths:
       - 'tsc.json'
+  pull_request:
+    types: [opened, edited]
+    branches:
+      - main
+    paths:
+      - 'tsc.json'
 
 jobs:
   check-author:
@@ -38,4 +44,5 @@ jobs:
           COMMIT_ID: ${{ github.sha }}
           USER_TYPE: ${{ steps.script_js.outputs.user_type }}
         run: node .github/workflows/script1.js $COMMIT_ID $USER_TYPE
+        
      
