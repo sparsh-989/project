@@ -6,7 +6,13 @@ on:
       - main
     paths:
       - 'tsc.json'
- 
+  pull_request:
+     types: [opened]
+     branches:
+      - main
+     paths:
+      - 'tsc.json'
+  
 
 jobs:
   check-author:
