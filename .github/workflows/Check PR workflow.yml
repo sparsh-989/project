@@ -14,7 +14,7 @@ jobs:
         with:
           script: |
             const { data: runs } = await github.actions.listWorkflowRunsForRepo({
-              workflow_id: '<your_workflow_id>',
+              workflow_id: '<4607908530>',
               branch: 'main',
               status: 'success'
             })
