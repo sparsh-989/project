@@ -8,8 +8,9 @@ const { exec } = require("child_process");
 
     const allowedChangesByHuman = ["twitter", "slack", "linkedin", "availableForHire"];
     const allowedChangesByBot = ["name", "repos", "github"];
-    const gitDiffCommand = `git diff ${commitId}^!`;
+    const gitDiffCommand = `git diff ${parentCommitId} ${commitId}`;
     console.log(`Executing command: ${gitDiffCommand}`);
+
 
 
       exec(gitDiffCommand, async (error, gitDiffOutput) => {
