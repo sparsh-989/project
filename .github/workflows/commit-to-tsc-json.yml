@@ -29,7 +29,6 @@ jobs:
       - name: Run script.js
         id: script_js
         env:
-          
           COMMIT_ID: ${{ github.event.pull_request.head.sha }}
 
         run: |
