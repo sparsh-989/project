@@ -17,6 +17,9 @@ const { exec } = require("child_process");
 
       const lines = gitDiffOutput.split("\n");
       const fieldCounts = new Map();
+      console.log(`gitDiffOutput: ${gitDiffOutput}`);
+      console.log(`fieldCounts: ${JSON.stringify([...fieldCounts.entries()])}`);
+
 
       for (const line of lines) {
         const fieldName = line.match(/"([a-zA-Z]+)":/)?.[1];
