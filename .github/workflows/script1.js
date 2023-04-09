@@ -9,7 +9,7 @@ const { exec } = require("child_process");
     const allowedChangesByHuman = ["twitter", "slack", "linkedin", "availableForHire"];
     const allowedChangesByBot = ["name", "repos", "github"];
 
-    exec(`git diff ${commitId}^!`, async (error, gitDiffOutput) => {
+    exec(`git diff ${commitId}`, async (error, gitDiffOutput) => {
       if (error) {
         console.error(`Error: ${error.message}`);
         return;
