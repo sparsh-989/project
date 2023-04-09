@@ -3,6 +3,7 @@ const { exec } = require("child_process");
 (async () => {
   try {
     const commitId = process.argv[2];
+    console.log(commitId);
     const userType = process.argv[3];
 
     const allowedChangesByHuman = ["twitter", "slack", "linkedin", "availableForHire"];
