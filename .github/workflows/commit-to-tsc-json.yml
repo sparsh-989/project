@@ -6,8 +6,6 @@ on:
       - main
     paths:
       - 'tsc.json'
-  
-  
 
 jobs:
   check-author:
@@ -17,11 +15,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 10
-      - name: List commit history and show specific commit
-        run: |
-         git log --pretty=format:"%h - %s" -10
-         git show ${{ github.sha }}
-
 
       - name: Set up Node.js
         uses: actions/setup-node@v2
@@ -35,16 +28,26 @@ jobs:
         id: script_js
         env:
           COMMIT_ID: ${{ github.sha }}
-
         run: |
           output=$(node .github/workflows/script.js $COMMIT_ID)
           echo "$output"
           echo "$output" | grep -Eo "::set-output name=user_type::\S+" | awk -F '::' '{print $3}' > temp_usertype.txt
           cat temp_usertype.txt
+
+      - name: List commit history and show specific commit
+        run: |
+          git log --pretty=format:"%h - %s" -10
+          git show ${{ github.sha }}
+
+      - name: Get parent commit ID
+        id: get_parent_commit_id
+        run: |
+          parent_commit_id=$(git rev-parse ${{ github.sha }}^1)
+          echo "parent_commit_id=$parent_commit_id" >> $GITHUB_ENV
+
       - name: Run script1.js
         env:
           COMMIT_ID: ${{ github.sha }}
+          PARENT_COMMIT_ID: ${{ env.parent_commit_id }}
           USER_TYPE: ${{ steps.script_js.outputs.user_type }}
-        run: node .github/workflows/script1.js $COMMIT_ID $USER_TYPE
-        
-     
+        run: node .github/workflows/script1.js $COMMIT_ID $PARENT_COMMIT_ID $USER_TYPE
