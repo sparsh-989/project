@@ -8,8 +8,11 @@ const { exec } = require("child_process");
 
     const allowedChangesByHuman = ["twitter", "slack", "linkedin", "availableForHire"];
     const allowedChangesByBot = ["name", "repos", "github"];
+    const gitDiffCommand = `git diff ${commitId}^!`;
+    console.log(`Executing command: ${gitDiffCommand}`);
 
-     exec(`git diff ${commitId}^!`, async (error, gitDiffOutput) => {
+
+      exec(gitDiffCommand, async (error, gitDiffOutput) => {
       if (error) {
         console.error(`Error: ${error.message}`);
         return;
@@ -17,7 +20,7 @@ const { exec } = require("child_process");
 
       const lines = gitDiffOutput.split("\n");
       const fieldCounts = new Map();
-      console.log(`gitDiffOutput: ${gitDiffOutput.toString()}`);
+     console.log(`gitDiffOutput: ${gitDiffOutput.toString()}`);
 
       console.log(`fieldCounts: ${JSON.stringify([...fieldCounts.entries()])}`);
 
