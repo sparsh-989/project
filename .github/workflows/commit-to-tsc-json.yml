@@ -29,7 +29,9 @@ jobs:
       - name: Run script.js
         id: script_js
         env:
-          COMMIT_ID: ${{ github.sha }}
+          
+          COMMIT_ID: ${{ github.event.pull_request.head.sha }}
+
         run: |
           output=$(node .github/workflows/script.js $COMMIT_ID)
           echo "$output"
