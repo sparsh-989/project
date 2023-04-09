@@ -1,7 +1,7 @@
 name: Check Commit Author
 
 on:
-  push:
+  pull_request:
     branches:
       - main
     paths:
@@ -27,7 +27,7 @@ jobs:
       - name: Run script.js
         id: script_js
         env:
-          COMMIT_ID: ${{ github.sha }}
+          COMMIT_ID: ${{ github.event.pull_request.head.sha }}
         run: |
           output=$(node .github/workflows/script.js $COMMIT_ID)
           echo "$output"
@@ -37,17 +37,17 @@ jobs:
       - name: List commit history and show specific commit
         run: |
           git log --pretty=format:"%h - %s" -10
-          git show ${{ github.sha }}
+          git show ${{ github.event.pull_request.head.sha }}
 
       - name: Get parent commit ID
         id: get_parent_commit_id
         run: |
-          parent_commit_id=$(git rev-parse ${{ github.sha }}^1)
+          parent_commit_id=$(git rev-parse ${{ github.event.pull_request.head.sha }}^1)
           echo "parent_commit_id=$parent_commit_id" >> $GITHUB_ENV
 
       - name: Run script1.js
         env:
-          COMMIT_ID: ${{ github.sha }}
+          COMMIT_ID: ${{ github.event.pull_request.head.sha }}
           PARENT_COMMIT_ID: ${{ env.parent_commit_id }}
           USER_TYPE: ${{ steps.script_js.outputs.user_type }}
         run: node .github/workflows/script1.js $COMMIT_ID $PARENT_COMMIT_ID $USER_TYPE
