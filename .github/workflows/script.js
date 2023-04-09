@@ -6,6 +6,7 @@ const owner = "Sparsh-989"; // Replace with the repository owner's username
 const repo = "project"; // Replace with the repository name
 const fullCommitId = process.argv[2]; // Get the full commit ID from the command line argument
 const commitId = fullCommitId.slice(0, 7); // Extract the first 7 characters of the commit ID
+console.log(commitId);
 
 async function getUsernameByCommitId() {
   try {
